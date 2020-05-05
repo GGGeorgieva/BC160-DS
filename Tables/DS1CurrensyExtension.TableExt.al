@@ -4,14 +4,14 @@ tableextension 46015506 DS1CurrencyExtension extends Currency
 
     fields
     {
-        field(46015505; "Currency Gender"; Option)
+        field(46015505; "DS1 Currency Gender"; Option)
         {
             Caption = 'Currency Gender';
             Description = 'NAVBG11.0,001';
             OptionCaption = 'Masculine,Feminine,Neutral';
             OptionMembers = Masculine,Feminine,Neutral;
         }
-        field(46015605; "Customs Currency Code"; Code[10])
+        field(46015605; "DS1 Customs Currency Code"; Code[10])
         {
             Caption = 'Customs Currency Code';
             Description = 'NAVE111.0';
@@ -19,7 +19,10 @@ tableextension 46015506 DS1CurrencyExtension extends Currency
         }
     }
 
+    trigger OnBeforeDelete()
+    begin
 
+    end;
     //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
 
     //trigger OnDelete();

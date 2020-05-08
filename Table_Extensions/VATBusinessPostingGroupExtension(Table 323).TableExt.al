@@ -1,10 +1,10 @@
-tableextension 46015558 tableextension46015558 extends "VAT Business Posting Group" 
+tableextension 46015558 "VAT Bus. Posting Group Ext." extends "VAT Business Posting Group"
 {
     // version NAVW111.00,NAVE111.0
 
     fields
     {
-        field(46015700;"Unrealized VAT";Boolean)
+        field(46015700; "Unrealized VAT"; Boolean)
         {
             Caption = 'Unrealized VAT';
             Description = 'NAVBG11.0';

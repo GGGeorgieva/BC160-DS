@@ -1,10 +1,10 @@
-tableextension 46015543 tableextension46015543 extends "VAT Statement Name" 
+tableextension 46015543 "VAT Statement Name Extension" extends "VAT Statement Name"
 {
     // version NAVW17.00,NAVE111.0
 
     fields
     {
-        field(46015605;"Date Row Filter";Date)
+        field(46015605; "Date Row Filter"; Date)
         {
             Caption = 'Date Row Filter';
             Description = 'NAVE111.0,001';

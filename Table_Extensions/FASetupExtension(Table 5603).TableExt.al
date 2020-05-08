@@ -1,14 +1,14 @@
-tableextension 46015575 tableextension46015575 extends "FA Setup" 
+tableextension 46015575 "FA Setup Extension" extends "FA Setup"
 {
     // version NAVW111.00,NAVE111.0
 
     fields
     {
-        field(46015633;"Fixed Asset History";Boolean)
+        field(46015633; "Fixed Asset History"; Boolean)
         {
             Caption = 'Fixed Asset History';
             Description = 'NAVE111.0,001';
-
+            /*
             trigger OnValidate();
             var
                 InitFAHistory : Report "Initialize FA History";
@@ -18,6 +18,7 @@ tableextension 46015575 tableextension46015575 extends "FA Setup"
                   InitFAHistory.RUNMODAL;
                 end;
             end;
+            */
         }
     }
 

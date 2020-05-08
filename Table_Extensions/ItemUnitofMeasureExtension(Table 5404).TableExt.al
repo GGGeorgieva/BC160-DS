@@ -1,10 +1,10 @@
-tableextension 46015574 tableextension46015574 extends "Item Unit of Measure" 
+tableextension 46015574 "Item Unit of Measure Extension" extends "Item Unit of Measure"
 {
     // version NAVW111.00.00.23572,NAVBG11.0
 
     fields
     {
-        field(46015505;"Product Tax (LCY)";Decimal)
+        field(46015505; "Product Tax (LCY)"; Decimal)
         {
             Caption = 'Product Tax (LCY)';
             Description = 'NAVBG11.0,001';

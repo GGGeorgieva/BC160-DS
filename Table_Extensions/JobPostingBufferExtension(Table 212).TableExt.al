@@ -1,10 +1,10 @@
-tableextension 46015527 tableextension46015527 extends "Job Posting Buffer" 
+tableextension 46015527 "Job Posting Buffer Extension" extends "Job Posting Buffer"
 {
     // version NAVW111.00.00.20783,NAVE111.0
 
     fields
     {
-        field(46015605;Correction;Boolean)
+        field(46015605; Correction; Boolean)
         {
             Caption = 'Correction';
             Description = 'NAVE111.0,001';

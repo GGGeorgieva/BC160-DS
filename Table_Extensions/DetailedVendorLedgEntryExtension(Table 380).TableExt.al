@@ -1,10 +1,10 @@
-tableextension 46015570 tableextension46015570 extends "Detailed Vendor Ledg. Entry" 
+tableextension 46015570 "Det. Vend. Ledg. Entry Ext." extends "Detailed Vendor Ledg. Entry"
 {
     // version NAVW111.00.00.20783,NAVE111.0
 
     fields
     {
-        field(46015625;"Vendor Posting Group";Code[10])
+        field(46015625; "Vendor Posting Group"; Code[10])
         {
             Caption = 'Vendor Posting Group';
             Description = 'NAVE111.0,001';

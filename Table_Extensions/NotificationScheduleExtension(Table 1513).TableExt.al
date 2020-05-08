@@ -1,4 +1,4 @@
-tableextension 46015521 tableextension46015521 extends "Notification Schedule" 
+tableextension 46015521 "Notification Schedule Ext." extends "Notification Schedule"
 {
     // version NAVW111.00.00.20783,NAVE111.0
 
@@ -9,7 +9,6 @@ tableextension 46015521 tableextension46015521 extends "Notification Schedule"
     //Unsupported feature: PropertyChange. Please convert manually.
 
     var
-        WorkDayTxt : Label '<+WD%1>';
-        LocalizationUsage : Codeunit "Localization Usage";
+        WorkDayTxt: Label '<+WD%1>';
 }
 

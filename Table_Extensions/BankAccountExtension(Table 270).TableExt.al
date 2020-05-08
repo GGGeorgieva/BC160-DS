@@ -252,6 +252,6 @@ tableextension 46015537 "Bank Account Extension" extends "Bank Account"
         CashReportHeader: Record "Cash Report Header";
         Text46012225: Label 'All entries will be excluded from Exchange Rates Adjustment. Do you want to continue?';
         Text46012226: Label 'You cannot uncheck %1.';
-        LocalizationUsage: Codeunit "Localization Usage";
+
 }
 

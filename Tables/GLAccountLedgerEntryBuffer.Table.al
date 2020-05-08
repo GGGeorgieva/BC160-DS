@@ -43,7 +43,8 @@ table 46015806 "GLAccount Ledger Entry Buffer"
             var
                 IncomingDocument: Record "Incoming Document";
             begin
-                IncomingDocument.HyperlinkToDocument("Document No.", "Posting Date");
+                // TODO MISSING HyperlinkToDocument
+                //IncomingDocument.HyperlinkToDocument("Document No.", "Posting Date");
             end;
         }
         field(7; Description; Text[50])
@@ -94,7 +95,8 @@ table 46015806 "GLAccount Ledger Entry Buffer"
             var
                 UserMgt: Codeunit "User Management";
             begin
-                UserMgt.LookupUserID("User ID");
+                // TODO MISSING LookupUserID
+                //UserMgt.LookupUserID("User ID");
             end;
         }
         field(28; "Source Code"; Code[10])

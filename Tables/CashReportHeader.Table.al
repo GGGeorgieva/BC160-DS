@@ -31,8 +31,9 @@ table 46015649 "Cash Report Header"
             begin
 
                 BankAccount."No." := "Cash Desk No.";
-                if PAGE.RUNMODAL(PAGE::Page46012248, BankAccount, BankAccount."No.") = ACTION::LookupOK then
-                    "Cash Desk No." := BankAccount."No.";
+                // TODO MISSING PAGE Page46012248
+                // if PAGE.RUNMODAL(PAGE::Page46012248, BankAccount, BankAccount."No.") = ACTION::LookupOK then
+                "Cash Desk No." := BankAccount."No.";
             end;
         }
         field(2; "No."; Code[20])
@@ -168,8 +169,8 @@ table 46015649 "Cash Report Header"
         "Currency Code" := CashAcc."Currency Code";
         CashAcc.TESTFIELD("Cash Desk Report Nos.");
         "No. Series" := CashAcc."Cash Desk Report Nos.";
-
-        CashAcc.SetCashReptStartingBalance(Rec);
+        // TODO MISSING METHOD SetCashReptStartingBalance
+        //CashAcc.SetCashReptStartingBalance(Rec);
     end;
 
     trigger OnModify();
@@ -196,7 +197,8 @@ table 46015649 "Cash Report Header"
         NoSeriesMgt: Codeunit NoSeriesManagement;
         AmountToDeposit: Decimal;
         Text006: Label 'You cannot rename %1.';
-        CashOrderPost: Codeunit "Cash Order-Post";
+    //TODO MISSING CODEUNIT "Cash Order-Post
+    // CashOrderPost: Codeunit "Cash Order-Post";
 
     procedure AssistEdit(OldCashReport: Record "Cash Report Header"): Boolean;
     begin
@@ -289,9 +291,10 @@ table 46015649 "Cash Report Header"
                 if FINDSET then
                     repeat
                         CashOrderHeader.GET("Cash Desk No.", "Cash Order Type", "Cash Order No.");
-                        CashOrderPost.SetCalledFrom(1);
-                        CashOrderPost.RUN(CashOrderHeader);
-                        CLEAR(CashOrderPost);
+                    //TODO MISSING CODEUNIT "Cash Order-Post
+                    // CashOrderPost.SetCalledFrom(1);
+                    // CashOrderPost.RUN(CashOrderHeader);
+                    // CLEAR(CashOrderPost);
                     until NEXT = 0;
                 MODIFYALL(Status, Status::Posted);
             end;
@@ -299,8 +302,8 @@ table 46015649 "Cash Report Header"
         Status := Status::Closed;
         "Closing Date" := TODAY;
         MODIFY;
-
-        AmountToDeposit := CashAcc.ControlBalanceLimit("Ending Balance");
+        //TODO MISSING METHOD ControlBalanceLimit
+        //AmountToDeposit := CashAcc.ControlBalanceLimit("Ending Balance");
         if AmountToDeposit <> 0 then
             MESSAGE(Text004, CashAcc."No.", AmountToDeposit);
     end;

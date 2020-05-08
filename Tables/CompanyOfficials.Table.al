@@ -239,8 +239,9 @@ table 46015605 "Company Officials"
         MapPoint: Record "Online Map Setup";
         MapMgt: Codeunit "Online Map Management";
     begin
-        if MapPoint.FIND('-') then
-            MapMgt.MakeSelection(DATABASE::Table46012225, GETPOSITION);
+        //TODO MISSING TABLE Table46012225
+        //if MapPoint.FIND('-') then
+        // MapMgt.MakeSelection(DATABASE::Table46012225, GETPOSITION);
     end;
 }
 

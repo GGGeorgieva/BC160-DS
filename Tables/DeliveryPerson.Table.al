@@ -25,7 +25,8 @@ table 46015631 "Delivery Person"
         {
             Caption = 'Identity Card No.';
             NotBlank = true;
-            ValidateTableRelation = false;
+            //TODO MISSING PROPERTY TABLERELATION
+            //ValidateTableRelation = false;
         }
         field(2; "Delivery Person Name"; Text[30])
         {

@@ -126,7 +126,8 @@ table 46015635 "Export SAD Statement"
         ReportSelection: Record "Report Selections";
     begin
         ReportSelection.RESET;
-        ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG4);
+        //TODO MISSING  ReportSelection.Usage::BG4
+        //ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG4);
         ReportSelection.SETFILTER("Report ID", '<>0');
         if ReportSelection.FINDSET then
             repeat

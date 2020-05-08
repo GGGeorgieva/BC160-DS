@@ -396,7 +396,8 @@ table 46015622 "Import SAD Header"
                 if not SADTariff.FINDFIRST then
                     ERROR(Text004, "No.");
             end;
-            ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG1);
+            //TODO MISSING ReportSelection.Usage::BG1
+            //ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG1);
             ReportSelection.SETFILTER("Report ID", '<>0');
             if ReportSelection.FINDSET then
                 repeat

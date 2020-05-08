@@ -33,7 +33,8 @@ table 46015645 "Cash Order Header"
 
                 if not CashDeskAcc.GET("Cash Desk No.") then
                     CashDeskAcc."Account Type" := CashDeskAcc."Account Type"::"Cash Desk";
-                CashDeskAcc.Lookup;
+                //TODO MISSING LOOKUP
+                //CashDeskAcc.Lookup;
             end;
 
             trigger OnValidate();
@@ -360,25 +361,27 @@ table 46015645 "Cash Order Header"
 
     procedure Lookup();
     var
-        CashReceiptList: Page "Cash Receipt List";
-        CashWithdrawalList: Page "Cash Withdrawal List";
+    //TODO MISSING PAGES "Cash Receipt List" AND "Cash Withdrawal List"
+    //    CashReceiptList: Page "Cash Receipt List";
+    //    CashWithdrawalList: Page "Cash Withdrawal List";
     begin
-        case "Order Type" of
-            "Order Type"::Receipt:
-                begin
-                    CashReceiptList.LOOKUPMODE(true);
-                    CashReceiptList.SETRECORD(Rec);
-                    if CashReceiptList.RUNMODAL = ACTION::LookupOK then
-                        CashReceiptList.GETRECORD(Rec);
-                end;
-            "Order Type"::Withdrawal:
-                begin
-                    CashWithdrawalList.LOOKUPMODE(true);
-                    CashWithdrawalList.SETRECORD(Rec);
-                    if CashWithdrawalList.RUNMODAL = ACTION::LookupOK then
-                        CashWithdrawalList.GETRECORD(Rec);
-                end;
-        end;
+        /*  case "Order Type" of
+              "Order Type"::Receipt:
+                  begin
+                      CashReceiptList.LOOKUPMODE(true);
+                      CashReceiptList.SETRECORD(Rec);
+                      if CashReceiptList.RUNMODAL = ACTION::LookupOK then
+                          CashReceiptList.GETRECORD(Rec);
+                  end;
+              "Order Type"::Withdrawal:
+                  begin
+                      CashWithdrawalList.LOOKUPMODE(true);
+                      CashWithdrawalList.SETRECORD(Rec);
+                      if CashWithdrawalList.RUNMODAL = ACTION::LookupOK then
+                          CashWithdrawalList.GETRECORD(Rec);
+                  end;
+          end;
+        */
     end;
 
     local procedure TestNoSeries(): Boolean;
@@ -462,10 +465,11 @@ table 46015645 "Cash Order Header"
         OldDimSetID: Integer;
     begin
         OldDimSetID := "Dimension Set ID";
-        "Dimension Set ID" :=
-          DimMgt.EditDimensionSet2(
-            "Dimension Set ID", STRSUBSTNO('%1 %2', TABLECAPTION, "No."),
-            "Shortcut Dimension 1 Code", "Shortcut Dimension 2 Code");
+        //TODO MISSING METHOD EditDimensionSet2
+        //"Dimension Set ID" :=
+        //  DimMgt.EditDimensionSet2(
+        //    "Dimension Set ID", STRSUBSTNO('%1 %2', TABLECAPTION, "No."),
+        //    "Shortcut Dimension 1 Code", "Shortcut Dimension 2 Code");
         if OldDimSetID <> "Dimension Set ID" then begin
             MODIFY;
             if CashOrderLinesExist then

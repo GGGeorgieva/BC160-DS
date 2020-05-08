@@ -38,48 +38,34 @@ tableextension 46015614 "Acc. Scedule Name Extension" extends "Acc. Schedule Nam
         }
     }
 
+    trigger OnBeforeDelete()
+    begin
+        if IsResultsExist(Name) then
+            if CONFIRM(Text46012225, false, GetRecordDescription(Name)) then begin
+                AccScheduleResultHeader.SETRANGE("Acc. Schedule Name", Name);
+                AccScheduleResultHeader.DELETEALL(true);
+            end;
+    end;
 
-    //Unsupported feature: CodeInsertion on "OnDelete". Please convert manually.
+    procedure IsResultsExist(AccSchedName: Code[10]): Boolean;
 
-    //trigger (Variable: ++++++++)();
-    //Parameters and return type have not been exported.
-    //begin
-    /*
-    */
-    //end;
+    var
+        AccScheduleResultHeader: Record "Acc. Schedule Result Header";
+    begin
+        ;
+        AccScheduleResultHeader.SETRANGE("Acc. Schedule Name", AccSchedName);
+        exit(not AccScheduleResultHeader.ISEMPTY);
+    end;
 
+    procedure GetRecordDescription(AccSchedName: Code[10]): Text[100];
+    var
+        AccScheduleName: Record "Acc. Schedule Name";
+    begin
 
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
+        AccScheduleName.GET(AccSchedName);
+        exit(STRSUBSTNO('%1 %2=''%3''', AccScheduleName.TABLECAPTION, FIELDCAPTION(Name), AccSchedName));
+    end;
 
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    AccSchedLine.SETRANGE("Schedule Name",Name);
-    AccSchedLine.DELETEALL;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    //NAVE111.0; 001; begin
-    if IsResultsExist(Name) and LocalizationUsage.UseEastLocalization then
-      if CONFIRM(Text46012225,false,GetRecordDescription(Name)) then begin
-        AccScheduleResultHeader.SETRANGE("Acc. Schedule Name",Name);
-        AccScheduleResultHeader.DELETEALL(true);
-      end;
-    //NAVE111.0; 001; end
-
-    AccSchedLine.SETRANGE("Schedule Name",Name);
-    AccSchedLine.DELETEALL;
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
 
 
     var

@@ -4,18 +4,13 @@ tableextension 46015541 "Customer Bank Acc. Extension" extends "Customer Bank Ac
 
     fields
     {
-
-        //Unsupported feature: CodeInsertion on ""Bank Account No."(Field 14)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; single
-        if LocalizationUsage.UseEastLocalization then
-          BGUtils.TestBankAcc("Bank Account No.","Country/Region Code");
-        */
-        //end;
+        modify("Bank Account No.")
+        {
+            trigger OnBeforeValidate()
+            begin
+                BGUtils.TestBankAcc("Bank Account No.", "Country/Region Code");
+            end;
+        }
         field(46015505; "Bank Code"; Text[30])
         {
             Caption = 'Bank Code';
@@ -66,6 +61,6 @@ tableextension 46015541 "Customer Bank Acc. Extension" extends "Customer Bank Ac
     var
         BGUtils: Codeunit "BG Utils";
         LocalBank: Record "Local Bank";
-        
+
 }
 

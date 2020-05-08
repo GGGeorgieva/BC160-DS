@@ -141,7 +141,22 @@ tableextension 46015524 "Customer Extension" extends Customer
         }
     }
 
-
+    procedure GetLinkedVendor(): Code[20];
+    VAR
+        ContBusRel: Record "Contact Business Relation";
+    BEGIN
+        //NAVE111.0; 001; entire function
+        ContBusRel.SETCURRENTKEY("Link to Table", "No.");
+        ContBusRel.SETRANGE("Link to Table", ContBusRel."Link to Table"::Customer);
+        ContBusRel.SETRANGE("No.", "No.");
+        if ContBusRel.FINDFIRST then begin
+            ContBusRel.SETRANGE("Contact No.", ContBusRel."Contact No.");
+            ContBusRel.SETRANGE("Link to Table", ContBusRel."Link to Table"::Vendor);
+            ContBusRel.SETRANGE("No.");
+            if ContBusRel.FINDFIRST then
+                exit(ContBusRel."No.");
+        end;
+    END;
     //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
 
     //trigger OnDelete();

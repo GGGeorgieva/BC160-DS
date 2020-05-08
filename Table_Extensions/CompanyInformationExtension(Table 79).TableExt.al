@@ -4,31 +4,20 @@ tableextension 46015607 "Company Info. Extension" extends "Company Information"
 
     fields
     {
-
-        //Unsupported feature: CodeInsertion on ""Bank Branch No."(Field 13)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; single
-        if LocalizationUsage.UseEastLocalization then
-          BGUtils.TestBankCode("Bank Branch No.","Country/Region Code");
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""Bank Account No."(Field 14)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; single
-        if LocalizationUsage.UseEastLocalization then
-          BGUtils.TestBankAcc("Bank Account No.","Country/Region Code");
-        */
-        //end;
+        modify("Bank Branch No.")
+        {
+            trigger OnBeforeValidate()
+            begin
+                BGUtils.TestBankCode("Bank Branch No.", "Country/Region Code");
+            end;
+        }
+        modify("Bank Account No.")
+        {
+            trigger OnBeforeValidate()
+            begin
+                BGUtils.TestBankAcc("Bank Account No.", "Country/Region Code");
+            end;
+        }
         field(46015505; "Identification No."; Text[13])
         {
             Caption = 'Identification No.';
@@ -236,17 +225,18 @@ tableextension 46015607 "Company Info. Extension" extends "Company Information"
             Description = 'NAVBG11.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         BGUtils: Codeunit "BG Utils";
         IndustryCode: Record "Document Type";
         BankAcc: Record "Bank Account";
 
+    procedure GetDocFooter(LanguageCode: Code[10]): Text[250];
+    var
+        DocumentFooter: Record "Document Footer";
+    begin
+        DocumentFooter.INIT;
+        if DocumentFooter.GET(LanguageCode) then
+            exit(DocumentFooter."Footer Text");
+    end;
 }
 

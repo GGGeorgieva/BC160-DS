@@ -17,11 +17,5 @@ tableextension 46015606 "Exch. Rate Adjmt. Reg. Ext." extends "Exch. Rate Adjmt.
             IF ("Account Type" = CONST("Bank Account")) "Bank Account";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

@@ -13,7 +13,6 @@ tableextension 46015570 "Det. Vend. Ledg. Entry Ext." extends "Detailed Vendor L
     }
     keys
     {
-
         //Unsupported feature: PropertyChange on ""Entry No."(Key)". Please convert manually.
 
 

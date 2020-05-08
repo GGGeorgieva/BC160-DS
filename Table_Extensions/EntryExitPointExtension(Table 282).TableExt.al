@@ -11,11 +11,5 @@ tableextension 46015540 "Entry/Exit Point Extension" extends "Entry/Exit Point"
             TableRelation = "Country/Region";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

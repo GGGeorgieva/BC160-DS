@@ -72,42 +72,42 @@ tableextension 46015613 "Gen. Ledg. Setup Extension" extends "General Ledger Set
                 SalesSetup: Record "Sales & Receivables Setup";
                 ServiceSetup: Record "Service Mgt. Setup";
                 PurchSetup: Record "Purchases & Payables Setup";
+                GLEntry: Record "G/L Entry";
             begin
-                //TO DO
-                /*
-                  case "Use VAT Date" of
+
+                case "Use VAT Date" of
                     true:
-                      if CONFIRM(Text46012126,true,FIELDCAPTION("Use VAT Date"),
-                           GLEntry.FIELDCAPTION("VAT Date"),GLEntry.FIELDCAPTION("Posting Date"))
-                      then
-                        InitVATDate
-                      else
-                        "Use VAT Date" := xRec."Use VAT Date";
+                        if CONFIRM(Text46012126, true, FIELDCAPTION("Use VAT Date"),
+                             GLEntry.FIELDCAPTION("VAT Date"), GLEntry.FIELDCAPTION("Posting Date"))
+                        then
+                            InitVATDate
+                        else
+                            "Use VAT Date" := xRec."Use VAT Date";
                     false:
-                      begin
-                        GLEntry.RESET;
-                        GLEntry.SETFILTER("VAT Date",'>%1',0D);
-                        if GLEntry.FINDFIRST then
-                          ERROR(Text018,FIELDCAPTION("Use VAT Date"));
-                        if CONFIRM(Text46012125,false) then begin
-                          "Allow VAT Posting From" := 0D;
-                          "Allow VAT Posting To" := 0D;
-                          "Allow VAT Date Change in Lines" := false;
-                          if PurchSetup.GET then
-                            PurchSetup."Default VAT Date" := 0;
-                          if SalesSetup.GET then begin
-                            SalesSetup."Credit Memo Confirmation" := false;
-                            SalesSetup."Default VAT Date" := 0;
-                          end;
-                          if ServiceSetup.GET then begin
-                            ServiceSetup."Credit Memo Confirmation" := false;
-                            ServiceSetup."Default VAT Date" := 0;
-                          end;
-                        end else
-                          "Use VAT Date" := xRec."Use VAT Date";
-                      end;
-                  end;
-                  */
+                        begin
+                            GLEntry.RESET;
+                            GLEntry.SETFILTER("VAT Date", '>%1', 0D);
+                            if GLEntry.FINDFIRST then
+                                ERROR(Text018, FIELDCAPTION("Use VAT Date"));
+                            if CONFIRM(Text46012125, false) then begin
+                                "Allow VAT Posting From" := 0D;
+                                "Allow VAT Posting To" := 0D;
+                                "Allow VAT Date Change in Lines" := false;
+                                if PurchSetup.GET then
+                                    PurchSetup."Default VAT Date" := 0;
+                                if SalesSetup.GET then begin
+                                    SalesSetup."Credit Memo Confirmation" := false;
+                                    SalesSetup."Default VAT Date" := 0;
+                                end;
+                                if ServiceSetup.GET then begin
+                                    ServiceSetup."Credit Memo Confirmation" := false;
+                                    ServiceSetup."Default VAT Date" := 0;
+                                end;
+                            end else
+                                "Use VAT Date" := xRec."Use VAT Date";
+                        end;
+                end;
+
             end;
         }
         field(46015606; "Check VAT Identifier"; Boolean)
@@ -276,8 +276,6 @@ tableextension 46015613 "Gen. Ledg. Setup Extension" extends "General Ledger Set
     var
         OK: Boolean;
         Text006: Label 'Deleting the additional reporting currency will have no effect on already posted general ledger entries.\\';
-
-    var
         Text007: Label 'Do you want to delete the additional reporting currency?';
         Text008: Label '"If you change the additional reporting currency, future general ledger entries will be posted in the new reporting currency (and in LCY).  "';
         Text010: Label '"If you change the additional reporting currency, a batch job will appear. "';
@@ -291,6 +289,271 @@ tableextension 46015613 "Gen. Ledg. Setup Extension" extends "General Ledger Set
         Text46012128: Label 'East Localization is not active. For activating Bulgarian Localization first have to activate the East Localization.';
         Text46012129: Label 'Once activated this localization it`s not gonna be able to be deactivated. Do you want to continue ?';
         Text46012130: Label 'The localization cannot be deactivated.';
+
+        Text018: Label 'You cannot change the contents of the %1 field because there are posted ledger entries.';
+
+    procedure InitVATDate();
+    var
+        GLEntry: Record "G/L Entry";
+        VATEntry: Record "VAT Entry";
+        GenJnlLine: Record "Gen. Journal Line";
+        SalesHeader: Record "Sales Header";
+        SalesLine: Record "Sales Line";
+        SalesInvHeader: Record "Sales Invoice Header";
+        SalesInvLine: Record "Sales Invoice Line";
+        SalesCrMemoHeader: Record "Sales Cr.Memo Header";
+        SalesCrMemoLine: Record "Sales Cr.Memo Line";
+        SalesArchiveHeader: Record "Sales Header Archive";
+        SalesArchiveLine: Record "Sales Line Archive";
+        PurchHeader: Record "Purchase Header";
+        PurchLine: Record "Purchase Line";
+        PurchInvHeader: Record "Purch. Inv. Header";
+        PurchInvLine: Record "Purch. Inv. Line";
+        PurchCrMemoHeader: Record "Purch. Cr. Memo Hdr.";
+        PurchCrMemoLine: Record "Purch. Cr. Memo Line";
+        PurchArchiveHeader: Record "Purchase Header Archive";
+        PurchArchiveLine: Record "Purchase Line Archive";
+        ServiceHeader: Record "Service Header";
+        ServiceLine: Record "Service Line";
+        ServiceInvHeader: Record "Service Invoice Header";
+        ServiceInvLine: Record "Service Invoice Line";
+        ServiceCrMemoHeader: Record "Service Cr.Memo Header";
+        ServiceCrMemoLine: Record "Service Cr.Memo Line";
+    begin
+        with GLEntry do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                until NEXT = 0;
+        end;
+        with GenJnlLine do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                until NEXT = 0;
+        end;
+        with VATEntry do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                until NEXT = 0;
+        end;
+        with SalesHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    SalesLine.SETRANGE("Document Type", "Document Type");
+                    SalesLine.SETRANGE("Document No.", "No.");
+                    if SalesLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                SalesLine."VAT Date" := "Posting Date";
+                                SalesLine.MODIFY;
+                            end;
+                        until SalesLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with SalesInvHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    SalesInvLine.SETRANGE("Document No.", "No.");
+                    if SalesInvLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                SalesInvLine."VAT Date" := "Posting Date";
+                                SalesInvLine.MODIFY;
+                            end;
+                        until SalesInvLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with SalesCrMemoHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    SalesCrMemoLine.SETRANGE("Document No.", "No.");
+                    if SalesCrMemoLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                SalesCrMemoLine."VAT Date" := "Posting Date";
+                                SalesCrMemoLine.MODIFY;
+                            end;
+                        until SalesCrMemoLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with SalesArchiveHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    SalesArchiveLine.SETRANGE("Document Type", "Document Type");
+                    SalesArchiveLine.SETRANGE("Document No.", "No.");
+                    if SalesArchiveLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                SalesArchiveLine."VAT Date" := "Posting Date";
+                                SalesArchiveLine.MODIFY;
+                            end;
+                        until SalesArchiveLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with PurchHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    PurchLine.SETRANGE("Document Type", "Document Type");
+                    PurchLine.SETRANGE("Document No.", "No.");
+                    if PurchLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                PurchLine."VAT Date" := "Posting Date";
+                                PurchLine.MODIFY;
+                            end;
+                        until PurchLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with PurchInvHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    PurchInvLine.SETRANGE("Document No.", "No.");
+                    if PurchInvLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                PurchInvLine."VAT Date" := "Posting Date";
+                                PurchInvLine.MODIFY;
+                            end;
+                        until PurchInvLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with PurchCrMemoHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    PurchCrMemoLine.SETRANGE("Document No.", "No.");
+                    if PurchCrMemoLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                PurchCrMemoLine."VAT Date" := "Posting Date";
+                                PurchCrMemoLine.MODIFY;
+                            end;
+                        until PurchCrMemoLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with PurchArchiveHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    PurchArchiveLine.SETRANGE("Document Type", "Document Type");
+                    PurchArchiveLine.SETRANGE("Document No.", "No.");
+                    if PurchArchiveLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                PurchArchiveLine."VAT Date" := "Posting Date";
+                                PurchArchiveLine.MODIFY;
+                            end;
+                        until PurchArchiveLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with ServiceHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    ServiceLine.SETRANGE("Document Type", "Document Type");
+                    ServiceLine.SETRANGE("Document No.", "No.");
+                    if ServiceLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                ServiceLine."VAT Date" := "Posting Date";
+                                ServiceLine.MODIFY;
+                            end;
+                        until ServiceLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with ServiceInvHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    ServiceInvLine.SETRANGE("Document No.", "No.");
+                    if ServiceInvLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                ServiceInvLine."VAT Date" := "Posting Date";
+                                ServiceInvLine.MODIFY;
+                            end;
+                        until ServiceInvLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+        with ServiceCrMemoHeader do begin
+            RESET;
+            if FINDSET(true) then
+                repeat
+                    if "VAT Date" = 0D then begin
+                        "VAT Date" := "Posting Date";
+                        MODIFY;
+                    end;
+                    ServiceCrMemoLine.SETRANGE("Document No.", "No.");
+                    if ServiceCrMemoLine.FINDSET(true) then
+                        repeat
+                            if "VAT Date" = 0D then begin
+                                ServiceCrMemoLine."VAT Date" := "Posting Date";
+                                ServiceCrMemoLine.MODIFY;
+                            end;
+                        until ServiceCrMemoLine.NEXT = 0;
+                until NEXT = 0;
+        end;
+    end;
 
 }
 

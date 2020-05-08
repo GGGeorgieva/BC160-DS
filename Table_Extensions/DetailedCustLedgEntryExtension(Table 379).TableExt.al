@@ -11,11 +11,5 @@ tableextension 46015564 "Det. Cust. Ledg. Entry Ext." extends "Detailed Cust. Le
             TableRelation = "Customer Posting Group";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

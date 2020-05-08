@@ -10,44 +10,13 @@ tableextension 46015571 "Finance Charge Terms Extension" extends "Finance Charge
             Description = 'NAVE111.0,001';
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    FinChrgText.SETRANGE("Fin. Charge Terms Code",Code);
-    FinChrgText.DELETEALL;
-
-    CurrForFinChrgTerms.SETRANGE("Fin. Charge Terms Code",Code);
-    CurrForFinChrgTerms.DELETEALL;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..5
-
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      MultipleInterestRate.SETRANGE("Finance Charge Code",Code);
-      MultipleInterestRate.DELETEALL;
+    trigger OnBeforeDelete()
+    begin
+        MultipleInterestRate.SETRANGE("Finance Charge Code", Code);
+        MultipleInterestRate.DELETEALL;
     end;
-    //NAVE111.0; 001; end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 
     var
         MultipleInterestRate: Record "Multiple Interest Rate";
-
 }
 

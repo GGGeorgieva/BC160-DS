@@ -16,8 +16,7 @@ tableextension 46015525 "Cust. Ledger Entry Extension" extends "Cust. Ledger Ent
                 GenJnlLine.SETRANGE("Account No.", "Customer No.");
                 GenJnlLine.SETRANGE("Applies-to Doc. Type", "Document Type");
                 GenJnlLine.SETRANGE("Applies-to Doc. No.", "Document No.");
-                //TO DO
-                //GenJnlLine.SETRANGE(Compensation,true);
+                GenJnlLine.SETRANGE(Compensation, true);
                 if GenJnlLine.FINDFIRST then
                     ERROR(
                       Text46012225,

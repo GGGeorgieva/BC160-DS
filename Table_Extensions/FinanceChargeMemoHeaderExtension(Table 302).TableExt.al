@@ -1,77 +1,39 @@
 tableextension 46015548 "Fin. Ch. Memo Header Extension" extends "Finance Charge Memo Header"
-{
-    // version NAVW111.00.00.27667,NAVE111.0
+{    // version NAVW111.00.00.27667,NAVE111.0
 
     fields
     {
+        modify("Customer No.")
+        {
+            trigger OnBeforeValidate()
+            var
+                Cust: Record Customer;
+            begin
+                if "Customer No." = '' then
+                    exit;
+                Cust.GET("Customer No.");
+                "Registration No." := Cust."Registration No.";
+                "Registration No. 2" := Cust."Registration No. 2";
+                UpdateBankInfo;
+            end;
+        }
 
-        //Unsupported feature: CodeModification on ""Customer No."(Field 2).OnValidate". Please convert manually.
-
-        //trigger "(Field 2)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if CurrFieldNo = FIELDNO("Customer No.") then
-          if Undo then begin
-            "Customer No." := xRec."Customer No.";
-        #4..19
-        "Shortcut Dimension 1 Code" := Cust."Global Dimension 1 Code";
-        "Shortcut Dimension 2 Code" := Cust."Global Dimension 2 Code";
-        "VAT Registration No." := Cust."VAT Registration No.";
-        Cust.TESTFIELD("Customer Posting Group");
-        "Customer Posting Group" := Cust."Customer Posting Group";
-        "Gen. Bus. Posting Group" := Cust."Gen. Bus. Posting Group";
-        "VAT Bus. Posting Group" := Cust."VAT Bus. Posting Group";
-        "Tax Area Code" := Cust."Tax Area Code";
-        "Tax Liable" := Cust."Tax Liable";
-        VALIDATE("Fin. Charge Terms Code",Cust."Fin. Charge Terms Code");
-
-        CreateDim(DATABASE::Customer,"Customer No.");
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..22
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          "Registration No." := Cust."Registration No.";
-          "Registration No. 2" := Cust."Registration No. 2";
-        end;
-        //NAVE111.0; 001; end
-
-        #23..30
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          UpdateBankInfo;
-        //NAVE111.0; 001; end
-
-        CreateDim(DATABASE::Customer,"Customer No.");
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""Customer Posting Group"(Field 17)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if CurrFieldNo = FIELDNO("Customer Posting Group") then begin
-            SalesSetup.GET;
-            if SalesSetup."Allow Alter Posting Groups" then begin
-              if not SubstCustPostingGrp.GET(xRec."Customer Posting Group","Customer Posting Group") then
-                ERROR(Text46012225,xRec."Customer Posting Group","Customer Posting Group",SubstCustPostingGrp.TABLECAPTION);
-            end else
-              ERROR(Text46012226,FIELDCAPTION("Customer Posting Group"),SalesSetup.FIELDCAPTION("Allow Alter Posting Groups"));
-          end;
-        //NAVE111.0; 001; end
-        */
-        //end;
+        modify("Customer Posting Group")
+        {
+            trigger OnBeforeValidate()
+            var
+                SalesSetup: Record "Sales & Receivables Setup";
+            begin
+                if CurrFieldNo = FIELDNO("Customer Posting Group") then begin
+                    SalesSetup.GET;
+                    if SalesSetup."Allow Alter Posting Groups" then begin
+                        if not SubstCustPostingGrp.GET(xRec."Customer Posting Group", "Customer Posting Group") then
+                            ERROR(Text46012225, xRec."Customer Posting Group", "Customer Posting Group", SubstCustPostingGrp.TABLECAPTION);
+                    end else
+                        ERROR(Text46012226, FIELDCAPTION("Customer Posting Group"), SalesSetup.FIELDCAPTION("Allow Alter Posting Groups"));
+                end;
+            end;
+        }
         field(46015605; "Registration No."; Text[20])
         {
             Caption = 'Registration No.';
@@ -90,8 +52,7 @@ tableextension 46015548 "Fin. Ch. Memo Header Extension" extends "Finance Charge
 
             trigger OnValidate();
             begin
-                //TO DO
-                //UpdateBankInfo;
+                UpdateBankInfo;
             end;
         }
         field(46015616; "Bank Name"; Text[50])
@@ -142,107 +103,25 @@ tableextension 46015548 "Fin. Ch. Memo Header Extension" extends "Finance Charge
             end;
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    FinChrgMemoIssue.DeleteHeader(Rec,IssuedFinChrgMemoHdr);
-
-    FinChrgMemoLine.SETRANGE("Finance Charge Memo No.","No.");
-    FinChrgMemoLine.DELETEALL;
-
-    FinChrgMemoCommentLine.SETRANGE(Type,FinChrgMemoCommentLine.Type::"Finance Charge Memo");
-    FinChrgMemoCommentLine.SETRANGE("No.","No.");
-    FinChrgMemoCommentLine.DELETEALL;
-    #9..16
-        IssuedFinChrgMemoHdr.PrintRecords(true,false,false)
-      end;
+    trigger OnBeforeInsert()
+    var
+        SalesSetup: Record "Sales & Receivables Setup";
+    begin
+        SalesSetup.GET;
+        "Multiple Interest Rates" := SalesSetup."Multiple Interest Rates";
+        VALIDATE("Posting Desc. Code", SalesSetup."Fin. Charge Posting Desc. Code");
     end;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..5
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      DtldFinChargeMemoLine.SETRANGE("Finance Charge Memo No.","No.");
-      DtldFinChargeMemoLine.DELETEALL;
+
+    trigger OnBeforeModify()
+    begin
+        VALIDATE("Posting Desc. Code");
     end;
-    //NAVE111.0; 001; end
 
-    #6..19
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnInsert". Please convert manually.
-
-    //trigger OnInsert();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    SalesSetup.GET;
-    if "No." = '' then begin
-      SalesSetup.TESTFIELD("Fin. Chrg. Memo Nos.");
-      SalesSetup.TESTFIELD("Issued Fin. Chrg. M. Nos.");
-      NoSeriesMgt.InitSeries(
-        SalesSetup."Fin. Chrg. Memo Nos.",xRec."No. Series","Posting Date",
-        "No.","No. Series");
+    trigger OnBeforeDelete()
+    begin
+        DtldFinChargeMemoLine.SETRANGE("Finance Charge Memo No.", "No.");
+        DtldFinChargeMemoLine.DELETEALL;
     end;
-    "Posting Description" := STRSUBSTNO(Text000,"No.");
-    if ("No. Series" <> '') and
-       (SalesSetup."Fin. Chrg. Memo Nos." = SalesSetup."Issued Fin. Chrg. M. Nos.")
-    #12..19
-    if GETFILTER("Customer No.") <> '' then
-      if GETRANGEMIN("Customer No.") = GETRANGEMAX("Customer No.") then
-        VALIDATE("Customer No.",GETRANGEMIN("Customer No."));
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..8
-
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      "Multiple Interest Rates" := SalesSetup."Multiple Interest Rates";
-    //NAVE111.0; 001; end
-
-    #9..22
-
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      VALIDATE("Posting Desc. Code",SalesSetup."Fin. Charge Posting Desc. Code");
-    //NAVE111.0; 001; end
-    */
-    //end;
-
-
-    //Unsupported feature: CodeInsertion on "OnModify". Please convert manually.
-
-    //trigger OnModify();
-    //Parameters and return type have not been exported.
-    //begin
-    /*
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      VALIDATE("Posting Desc. Code");
-    //NAVE111.0; 001; end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 
     var
         DtldFinChargeMemoLine: Record "Detailed Fin. Charge Memo Line";
@@ -250,6 +129,39 @@ tableextension 46015548 "Fin. Ch. Memo Header Extension" extends "Finance Charge
         CompanyInfo: Record "Company Information";
         Text46012225: Label 'You cannot change the %1 to %2 because %3 has not been filled in.';
         Text46012226: Label 'You cannot change %1 until %2 will be checked in setup.';
+
+    procedure UpdateBankInfo();
+    var
+        BankAcc: Record "Bank Account";
+    begin
+        //NAVE111.0; 001; entire function
+        if BankAcc.GET("Bank No.") then begin
+            "Bank Name" := BankAcc.Name;
+            "Bank Account No." := BankAcc."Bank Account No.";
+            "Bank Branch No." := BankAcc."Bank Branch No.";
+            IBAN := BankAcc.IBAN;
+        end else begin
+            CompanyInfo.GET;
+            "Bank Name" := CompanyInfo."Bank Name";
+            "Bank Account No." := CompanyInfo."Bank Account No.";
+            "Bank Branch No." := CompanyInfo."Bank Branch No.";
+            IBAN := CompanyInfo.IBAN;
+        end;
+    end;
+
+    procedure GetPostingDescription(PostingDescCode: Code[10]; VAR PostingDescription: Text[50]);
+    var
+        PostingDesc: Record "Posting Description";
+        RecordReference: RecordRef;
+    begin
+        //NAVE111.0; 001; entire function
+        if PostingDesc.GET(PostingDescCode) then begin
+            PostingDesc.TESTFIELD(Type, PostingDesc.Type::"Finance Charge");
+            RecordReference.OPEN(DATABASE::"Finance Charge Memo Header");
+            RecordReference.GETTABLE(Rec);
+            PostingDescription := PostingDesc.ParsePostDescString(PostingDesc, RecordReference);
+        end;
+    end;
 
 }
 

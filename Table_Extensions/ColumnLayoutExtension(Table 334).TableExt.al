@@ -11,11 +11,5 @@ tableextension 46015559 "Column Layout Extension" extends "Column Layout"
             InitValue = false;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

@@ -12,15 +12,19 @@ tableextension 46015539 "Bank Acc. Post. Gr. Extension" extends "Bank Account Po
 
             trigger OnValidate();
             begin
-                // CheckGLAcc("G/L Interim Account No.");
+                CheckGLAcc("G/L Interim Account No.");
             end;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
+    procedure CheckGLAcc(AccNo: Code[20])
+    var
+        GLAcc: Record "G/L Account";
+    begin
+        if AccNo <> '' then begin
+            GLAcc.GET(AccNo);
+            GLAcc.CheckGLAcc;
+        end;
+    end;
 
 }
 

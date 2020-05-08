@@ -27,11 +27,5 @@ tableextension 46015531 "Gen. Posting Setup Extension" extends "General Posting 
             end;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

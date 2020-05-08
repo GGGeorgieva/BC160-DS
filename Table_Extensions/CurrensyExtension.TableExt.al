@@ -1,4 +1,4 @@
-tableextension 46015506 DS16_CurrencyExtension extends Currency
+tableextension 46015506 CurrencyExtension extends Currency
 {
     // version NAVW111.00,NAVE111.0,NAVBG11.0
 

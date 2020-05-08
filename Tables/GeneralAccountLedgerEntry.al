@@ -29,11 +29,9 @@ table 46015805 "General Account Ledger Entry"
             Caption = 'Posting Date';
             ClosingDates = true;
         }
-        field(5; "Document Type"; Option)
+        field(5; "Document Type"; Enum "Gen. Journal Document Type")
         {
             Caption = 'Document Type';
-            OptionCaption = '" ,Payment,Invoice,Credit Memo,Finance Charge Memo,Reminder,Refund"';
-            OptionMembers = " ",Payment,Invoice,"Credit Memo","Finance Charge Memo",Reminder,Refund;
         }
         field(6; "Document No."; Code[20])
         {
@@ -188,11 +186,9 @@ table 46015805 "General Account Ledger Entry"
         {
             Caption = 'External Document No.';
         }
-        field(57; "Source Type"; Option)
+        field(57; "Source Type"; Enum "Gen. Journal Source Type")
         {
             Caption = 'Source Type';
-            OptionCaption = '" ,Customer,Vendor,Bank Account,Fixed Asset"';
-            OptionMembers = " ",Customer,Vendor,"Bank Account","Fixed Asset";
         }
         field(58; "Source No."; Code[20])
         {

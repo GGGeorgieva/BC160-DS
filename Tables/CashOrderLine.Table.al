@@ -33,18 +33,14 @@ table 46015646 "Cash Order Line"
         {
             Caption = 'Line No.';
         }
-        field(4; "Document Type"; Option)
+        field(4; "Document Type"; Enum "Gen. Journal Document Type")
         {
             Caption = 'Document Type';
             Editable = false;
-            OptionCaption = '" ,Payment,,,,Refund"';
-            OptionMembers = " ",Payment,,,,Refund;
         }
-        field(5; "Account Type"; Option)
+        field(5; "Account Type"; Enum "Gen. Journal Account Type")
         {
             Caption = 'Account Type';
-            OptionCaption = '" ,G/L Account,Customer,Vendor,Bank Account"';
-            OptionMembers = " ","G/L Account",Customer,Vendor,"Bank Account";
 
             trigger OnValidate();
             var
@@ -177,11 +173,9 @@ table 46015646 "Cash Order Line"
                 end;
             end;
         }
-        field(14; "Applies-To Doc. Type"; Option)
+        field(14; "Applies-To Doc. Type"; enum "Gen. Journal Document Type")
         {
             Caption = 'Applies-To Doc. Type';
-            OptionCaption = '" ,Payment,Invoice,Credit Memo,Finance Charge Memo,Reminder,Refund"';
-            OptionMembers = " ",Payment,Invoice,"Credit Memo","Finance Charge Memo",Reminder,Refund;
 
             trigger OnValidate();
             begin
@@ -197,7 +191,7 @@ table 46015646 "Cash Order Line"
                 GenJnlLine: Record "Gen. Journal Line";
                 PaymentToleranceMgt: Codeunit "Payment Tolerance Management";
                 AccNo: Code[20];
-                AccType: Option "G/L Account",Customer,Vendor,"Bank Account","Fixed Asset","IC Partner";
+                AccType: enum "Gen. Journal Account Type";
                 xAmount: Decimal;
             // TODO MISSING  Codeunit "Cash Order-Post"
             // CashOrderPost : Codeunit "Cash Order-Post";
@@ -786,7 +780,7 @@ table 46015646 "Cash Order Line"
                 end else
                     GenJnlApply.CheckAgainstApplnCurrency(
                       GenJnlLine."Currency Code", VendLedgEntry."Currency Code",
-                      GenJnlLine."Account Type"::Vendor, true);
+                      GenJnlLine."Account Type"::" ", true);
             if Amount = 0 then begin
                 VendLedgEntry.CALCFIELDS("Remaining Amount");
                 GenJnlLine.VALIDATE(Amount, GetAmtToApplyVend(VendLedgEntry, GenJnlLine));

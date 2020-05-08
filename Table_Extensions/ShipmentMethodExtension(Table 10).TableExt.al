@@ -13,7 +13,8 @@ tableextension 46015617 "Shipment Method Extension" extends "Shipment Method"
             begin
                 if "Include Item Charges" then begin
                     TESTFIELD("Adjustment %", 0);
-                    CheckIncludeIntrastat;
+                    //TO DO
+                    //CheckIncludeIntrastat;
                 end;
             end;
         }

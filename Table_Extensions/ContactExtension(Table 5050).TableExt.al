@@ -22,7 +22,6 @@ tableextension 46015576 "Contact Extension" extends Contact
     //Unsupported feature: PropertyChange. Please convert manually.
 
 
-    var
-        LocalizationUsage: Codeunit "Localization Usage";
+
 }
 

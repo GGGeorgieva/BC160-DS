@@ -1,27 +1,29 @@
-tableextension 46015590 tableextension46015590 extends "Item Charge Assignment (Sales)" 
+tableextension 46015590 "ItemChAssignment(Sales)Ext." extends "Item Charge Assignment (Sales)"
 {
     // version NAVW111.00,NAVE111.0
 
     fields
     {
-        field(46015606;"Incl. in Intrastat Amount";Boolean)
+        field(46015606; "Incl. in Intrastat Amount"; Boolean)
         {
             Caption = 'Incl. in Intrastat Amount';
             Description = 'NAVE111.0,001';
 
             trigger OnValidate();
             begin
-                CheckIncludeIntrastat;
+                //TO DO
+                //CheckIncludeIntrastat;
             end;
         }
-        field(46015607;"Incl. in Intrastat Stat. Value";Boolean)
+        field(46015607; "Incl. in Intrastat Stat. Value"; Boolean)
         {
             Caption = 'Incl. in Intrastat Stat. Value';
             Description = 'NAVE111.0,001';
 
             trigger OnValidate();
             begin
-                CheckIncludeIntrastat;
+                //TO DO
+                //CheckIncludeIntrastat;
             end;
         }
     }

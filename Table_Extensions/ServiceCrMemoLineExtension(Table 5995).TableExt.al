@@ -1,10 +1,10 @@
-tableextension 46015604 tableextension46015604 extends "Service Cr.Memo Line" 
+tableextension 46015604 "Service Cr.Memo Line Ext." extends "Service Cr.Memo Line"
 {
     // version NAVW111.00,NAVE111.0
 
     fields
     {
-        field(46015610;"VAT Date";Date)
+        field(46015610; "VAT Date"; Date)
         {
             Caption = 'VAT Date';
             Description = 'NAVE111.0,001';

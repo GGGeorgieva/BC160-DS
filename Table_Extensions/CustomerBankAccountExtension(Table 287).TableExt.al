@@ -66,6 +66,6 @@ tableextension 46015541 "Customer Bank Acc. Extension" extends "Customer Bank Ac
     var
         BGUtils: Codeunit "BG Utils";
         LocalBank: Record "Local Bank";
-        LocalizationUsage: Codeunit "Localization Usage";
+        
 }
 

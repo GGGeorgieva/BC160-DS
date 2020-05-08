@@ -1,4 +1,4 @@
-tableextension 46015610 tableextension46015610 extends "Customer Posting Group" 
+tableextension 46015610 "Cust. Post. Group Extension" extends "Customer Posting Group"
 {
     // version NAVW111.00.00.24742,NAVE111.0
 
@@ -9,19 +9,19 @@ tableextension 46015610 tableextension46015610 extends "Customer Posting Group"
     //Parameters and return type have not been exported.
     //>>>> ORIGINAL CODE:
     //begin
-        /*
-        CheckCustEntries;
-        */
+    /*
+    CheckCustEntries;
+    */
     //end;
     //>>>> MODIFIED CODE:
     //begin
-        /*
-        CheckCustEntries;
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          DeleteSubstPostingGroups;
-        //NAVE111.0; 001; end
-        */
+    /*
+    CheckCustEntries;
+    //NAVE111.0; 001; begin
+    if LocalizationUsage.UseEastLocalization then
+      DeleteSubstPostingGroups;
+    //NAVE111.0; 001; end
+    */
     //end;
 
     //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
@@ -30,7 +30,5 @@ tableextension 46015610 tableextension46015610 extends "Customer Posting Group"
     //Unsupported feature: PropertyChange. Please convert manually.
 
 
-    var
-        LocalizationUsage : Codeunit "Localization Usage";
 }
 

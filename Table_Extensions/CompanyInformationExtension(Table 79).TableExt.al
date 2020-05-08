@@ -247,6 +247,6 @@ tableextension 46015607 "Company Info. Extension" extends "Company Information"
         BGUtils: Codeunit "BG Utils";
         IndustryCode: Record "Document Type";
         BankAcc: Record "Bank Account";
-        LocalizationUsage: Codeunit "Localization Usage";
+
 }
 

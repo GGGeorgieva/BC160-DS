@@ -88,6 +88,6 @@ tableextension 46015614 "Acc. Scedule Name Extension" extends "Acc. Schedule Nam
 
     var
         Text46012225: Label '%1 has results. Do you want to delete it anyway?';
-        LocalizationUsage: Codeunit "Localization Usage";
+
 }
 

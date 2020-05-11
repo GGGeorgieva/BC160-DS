@@ -1,6 +1,7 @@
 tableextension 46015536 "Item Extension" extends Item
 {
     // version NAVW111.00.00.27667,NAVBG11.0
+    //TODO Check if trigger OnAfterDelete is OK
 
     fields
     {

@@ -13,17 +13,11 @@ tableextension 46015570 "Det. Vend. Ledg. Entry Ext." extends "Detailed Vendor L
     }
     keys
     {
+        //TODO SumIndexFileds on keys
+
         //Unsupported feature: PropertyChange on ""Entry No."(Key)". Please convert manually.
-
-
         //Unsupported feature: PropertyChange on ""Vendor Ledger Entry No.","Entry Type","Posting Date"(Key)". Please convert manually.
 
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

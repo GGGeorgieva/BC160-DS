@@ -2,6 +2,9 @@ tableextension 46015520 "G/L Account Extension" extends "G/L Account"
 {
     // version NAVW111.00,NAVBG11.0,DS11.00
 
+    //TODO
+    //CalcFormula on fileds
+
     fields
     {
 
@@ -143,13 +146,6 @@ tableextension 46015520 "G/L Account Extension" extends "G/L Account"
         {
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         Text46012225: Label '%1 must be 0 at posting on %2 %3';
 }

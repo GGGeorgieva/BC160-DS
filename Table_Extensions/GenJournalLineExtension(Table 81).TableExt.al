@@ -4,6 +4,7 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
 
     fields
     {
+        //TODO
 
         //Unsupported feature: CodeInsertion on ""Account Type"(Field 3).OnValidate". Please convert manually.
 

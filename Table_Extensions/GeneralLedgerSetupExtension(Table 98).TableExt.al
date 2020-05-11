@@ -2,6 +2,9 @@ tableextension 46015613 "Gen. Ledg. Setup Extension" extends "General Ledger Set
 {
     // version NAVW111.00.00.28629,NAVE111.0,DS11.00
 
+    //TODO
+    //"Additional Reporting Currency" - OnValidate
+
     fields
     {
 

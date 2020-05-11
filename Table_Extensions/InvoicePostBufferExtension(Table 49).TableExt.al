@@ -2,6 +2,9 @@ tableextension 46015569 "Invoice Post. Buffer Extension" extends "Invoice Post. 
 {
     // version NAVW111.00.00.23019,NAVE111.0,NAVBG11.0
 
+    //TODO
+    //Procedure Update()
+
     fields
     {
         field(46015505; "Excise Amount"; Decimal)

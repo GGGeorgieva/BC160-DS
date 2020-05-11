@@ -39,11 +39,5 @@ tableextension 46015522 "Job Ledger Entry Extension" extends "Job Ledger Entry"
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

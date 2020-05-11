@@ -1,5 +1,8 @@
 tableextension 46015548 "Fin. Ch. Memo Header Extension" extends "Finance Charge Memo Header"
-{    // version NAVW111.00.00.27667,NAVE111.0
+{    // version NAVW111.00.00.27667,NAVE111.
+
+    //TODO
+    //Proocedure FinanceChargeRounding
 
     fields
     {

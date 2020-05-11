@@ -161,7 +161,7 @@ tableextension 46015554 "Item Ledger Entry Extension" extends "Item Ledger Entry
     }
     keys
     {
-        //TO DO
+        //TODO
         /*
         key(Key1;"Entry Type","Source No.","Document No.")
         {
@@ -172,10 +172,15 @@ tableextension 46015554 "Item Ledger Entry Extension" extends "Item Ledger Entry
         */
     }
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
+    procedure IsGLCorrection(): Boolean;
+    var
+        ValueEntry: Record "Value Entry";
+    begin
+        ValueEntry.SETCURRENTKEY("Item Ledger Entry No.");
+        ValueEntry.SETRANGE("Item Ledger Entry No.", "Entry No.");
+        if ValueEntry.FINDFIRST then
+            exit(ValueEntry."G/L Correction");
+    end;
 
 }
 

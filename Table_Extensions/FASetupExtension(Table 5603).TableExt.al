@@ -23,10 +23,5 @@ tableextension 46015575 "FA Setup Extension" extends "FA Setup"
         }
     }
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

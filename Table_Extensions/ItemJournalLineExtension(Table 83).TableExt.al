@@ -1,6 +1,7 @@
 tableextension 46015612 "Item Journal Line Extension" extends "Item Journal Line"
 {
-    // version NAVW111.00.00.26401,NAVE111.0,NAVBG11.0
+    // version NAVW111.00.00.26401,NAVE111.0,NAVBG11.0 
+
 
     fields
     {
@@ -317,7 +318,7 @@ tableextension 46015612 "Item Journal Line Extension" extends "Item Journal Line
     }
     keys
     {
-        //TO DO
+        //TODO
         /*
         key(Key1;"Document No.","Posting Date")
         {

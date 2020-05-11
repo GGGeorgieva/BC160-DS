@@ -11,10 +11,5 @@ tableextension 46015574 "Item Unit of Measure Extension" extends "Item Unit of M
         }
     }
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

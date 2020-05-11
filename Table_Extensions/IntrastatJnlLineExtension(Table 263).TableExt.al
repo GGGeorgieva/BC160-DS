@@ -4,6 +4,7 @@ tableextension 46015535 "Intrastat Jnl. Line Ext." extends "Intrastat Jnl. Line"
 
     fields
     {
+        //TODO
 
         //Unsupported feature: Change DecimalPlaces on ""Total Weight"(Field 22)". Please convert manually.
 

@@ -35,7 +35,8 @@ tableextension 46015578 "Fixed Asset Extension" extends "Fixed Asset"
     {
 
         //Unsupported feature: Deletion on ""FA Posting Group"(Key)". Please convert manually.
-        //TO DO
+
+        //TODO
         /*
         key(Key1;"FA Posting Group","FA Subclass Code")
         {
@@ -106,7 +107,7 @@ tableextension 46015578 "Fixed Asset Extension" extends "Fixed Asset"
 
     procedure PrintAssignmentAndDischarge();
     begin
-        //TO DO
+        //TODO
         /*      
           if CONFIRM(Text46012227) then begin
 

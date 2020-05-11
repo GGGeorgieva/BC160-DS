@@ -2,6 +2,9 @@ tableextension 46015550 "Fin. Ch. Memo Line Extension" extends "Finance Charge M
 {
     // version NAVW111.00,NAVE111.0.001
 
+    //TODO
+    //Procedure CalcFinChrg
+
     fields
     {
         field(46015625; Days; Integer)

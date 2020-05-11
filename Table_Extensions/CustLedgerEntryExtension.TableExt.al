@@ -53,7 +53,7 @@ tableextension 46015525 "Cust. Ledger Entry Extension" extends "Cust. Ledger Ent
     }
     keys
     {
-
+        //TODO
         // key(Key1;"Customer No.","Currency Code","Customer Posting Group","Document Type")
         // {
         //  }

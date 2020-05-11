@@ -4,6 +4,15 @@ tableextension 46015537 "Bank Account Extension" extends "Bank Account"
 
     fields
     {
+        //TODO - 
+        //Trigger OnInsert; 
+        //"No." - OnValidate
+        //"Currency Code" - OnValidate
+        //Procedure AssistEdit;
+        //Custom procedures
+
+
+
 
         //Unsupported feature: CodeModification on ""No."(Field 1).OnValidate". Please convert manually.
 

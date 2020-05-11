@@ -4,37 +4,18 @@ tableextension 46015526 "Job Journal Line Extension" extends "Job Journal Line"
 
     fields
     {
+        modify(Quantity)
+        {
+            trigger OnBeforeValidate()
+            var
+                GLSetup: Record "General Ledger Setup";
+            begin
+                GLSetup.GET;
+                if GLSetup."Mark Neg. Qty as Correction" then
+                    Correction := Quantity < 0;
+            end;
+        }
 
-        //Unsupported feature: CodeModification on "Quantity(Field 10).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        "Quantity (Base)" := CalcBaseQty(Quantity);
-        UpdateAllAmounts;
-
-        #4..6
-        CheckItemAvailable;
-        if Item."Item Tracking Code" <> '' then
-          ReserveJobJnlLine.VerifyQuantity(Rec,xRec);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..9
-
-        //NAVE111.0; 001; begin
-        if LocalizationUSage.UseEastLocalization then begin
-          GLSetup.GET;
-          if GLSetup."Mark Neg. Qty as Correction" then
-            Correction := Quantity < 0;
-        end;
-        //NAVE111.0; 001; end
-        */
-        //end;
         field(46015605; "Shipment Method Code"; Code[10])
         {
             Caption = 'Shipment Method Code';
@@ -71,15 +52,36 @@ tableextension 46015526 "Job Journal Line Extension" extends "Job Journal Line"
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         StatReportingSetup: Record "Stat. Reporting Setup";
         Text46012225: Label '%1 is required for Item %2.';
+
+    procedure CheckIntrastat();
+    begin
+        if (Type = Type::Item) and "Intrastat Transaction" then begin
+            StatReportingSetup.GET;
+            if StatReportingSetup."Transaction Type Mandatory" and ("Transaction Type" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Transaction Type"), "No.");
+            if StatReportingSetup."Transaction Spec. Mandatory" and ("Transaction Specification" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Transaction Specification"), "No.");
+            if StatReportingSetup."Transport Method Mandatory" and ("Transport Method" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Transport Method"), "No.");
+            if StatReportingSetup."Shipment Method Mandatory" and ("Shipment Method Code" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Shipment Method Code"), "No.");
+            if StatReportingSetup."Tariff No. Mandatory" and ("Tariff No." = '') then
+                ERROR(Text46012225, FIELDCAPTION("Tariff No."), "No.");
+            if StatReportingSetup."Net Weight Mandatory" and ("Net Weight" = 0) then
+                ERROR(Text46012225, FIELDCAPTION("Net Weight"), "No.");
+            if StatReportingSetup."Country/Region of Origin Mand." and ("Country/Region of Origin Code" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Country/Region of Origin Code"), "No.");
+        end;
+    end;
+
+    procedure IsIntrastatTransaction() IsIntrastat: Boolean;
+    var
+        CountryRegion: Record "Country/Region";
+    begin
+        exit(CountryRegion.IsIntrastat("Country/Region Code", false));
+    end;
 }
 

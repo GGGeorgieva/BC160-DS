@@ -2,6 +2,9 @@ tableextension 46015524 "Customer Extension" extends Customer
 {
     // version NAVW111.00.00.27667,NAVBG11.0,DS11.00
 
+    //TODO
+    //Procedure IsContactUpdateNeeded()
+
     fields
     {
         field(46015505; "Identification No."; Text[13])

@@ -83,8 +83,7 @@ tableextension 46015548 "Fin. Ch. Memo Header Extension" extends "Finance Charge
 
             trigger OnValidate();
             begin
-                //TO DO
-                //GetPostingDescription("Posting Desc. Code","Posting Description");
+                GetPostingDescription("Posting Desc. Code", "Posting Description");
             end;
         }
         field(46015631; "Bank Branch No."; Text[20])

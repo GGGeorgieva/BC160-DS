@@ -8,7 +8,7 @@ tableextension 46015575 "FA Setup Extension" extends "FA Setup"
         {
             Caption = 'Fixed Asset History';
             Description = 'NAVE111.0,001';
-            //TO DO
+            //TODO
             /*
             trigger OnValidate();
             var

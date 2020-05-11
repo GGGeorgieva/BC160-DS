@@ -46,11 +46,5 @@ tableextension 46015552 "IssuedFinChMemoHeaderExtension" extends "Issued Fin. Ch
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

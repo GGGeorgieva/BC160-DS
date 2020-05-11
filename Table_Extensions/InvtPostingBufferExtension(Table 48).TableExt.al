@@ -10,11 +10,5 @@ tableextension 46015568 "Invt. Posting Buffer Extension" extends "Invt. Posting 
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

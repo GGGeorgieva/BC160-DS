@@ -60,7 +60,7 @@ tableextension 46015523 "G/L Entry Extension" extends "G/L Entry"
     }
     keys
     {
-        //TO DO
+        //TODO
         /*
         key(Key1;"G/L Account No.","Business Unit Code","Global Dimension 1 Code","Global Dimension 2 Code","Posting Date","VAT Date")
         {

@@ -46,11 +46,5 @@ tableextension 46015549 "Issued Reminder Header Ext." extends "Issued Reminder H
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

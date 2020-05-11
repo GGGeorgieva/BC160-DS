@@ -9,23 +9,14 @@ tableextension 46015567 "G/L Register Extension" extends "G/L Register"
             Caption = 'From Entry No. (Bal. Acc.)';
             Description = 'DS11.00,001';
             TableRelation = "G/L Entry";
-            //This property is currently not supported
-            //TestTableRelation = false;
         }
         field(46015806; "To Entry No. (Bal. Acc.)"; Integer)
         {
             Caption = 'To Entry No. (Bal. Acc.)';
             Description = 'DS11.00,001';
             TableRelation = "G/L Entry";
-            //This property is currently not supported
-            //TestTableRelation = false;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
 
 }
 

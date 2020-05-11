@@ -46,22 +46,5 @@ tableextension 46015557 "Inventory Setup Extension" extends "Inventory Setup"
             TableRelation = "Excise Destination" WHERE("Destination Type" = CONST(Inbound));
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
-
-    //Unsupported feature: PropertyModification on "Text000(Variable 1001)". Please convert manually.
-
-    //var
-    //>>>> ORIGINAL VALUE:
-    //Text000 : ENU=Some unadjusted value entries will not be covered with the new setting. You must run the Adjust Cost - Item Entries batch job once to adjust these.;
-    //Variable type has not been exported.
-    //>>>> MODIFIED VALUE:
-    //Text000 : ENU="Some unadjusted value entries will not be covered with the new setting. You must run the Adjust Cost - Item Entries batch job once to adjust these. ";
-    //Variable type has not been exported.
 }
 

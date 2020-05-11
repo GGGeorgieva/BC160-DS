@@ -379,8 +379,7 @@ table 46015624 "Export SAD Header"
                 if not SADTariff.FINDFIRST then
                     ERROR(Text004, "No.");
             end;
-            //TODO MISSING ReportSelection.Usage::BG3)
-            //  ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG3);
+            ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG3);
             ReportSelection.SETFILTER("Report ID", '<>0');
             if ReportSelection.FINDSET then
                 repeat

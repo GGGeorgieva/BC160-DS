@@ -189,13 +189,10 @@ table 46015647 "Posted Cash Order Header"
         with PostedCashOrderHeader do begin
             COPY(Rec);
             FINDFIRST;
-            //TODO MISSING ReportSelection.Usage::BG7, ReportSelection.Usage::BG8
-            /*
             if "Order Type" = "Order Type"::Receipt then
-              ReportSelection.SETRANGE(Usage,ReportSelection.Usage::BG7)
+                ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG7)
             else
-              ReportSelection.SETRANGE(Usage,ReportSelection.Usage::BG8);
-            */
+                ReportSelection.SETRANGE(Usage, ReportSelection.Usage::BG8);
             ReportSelection.SETFILTER("Report ID", '<>0');
             ReportSelection.FINDSET;
             repeat

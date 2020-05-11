@@ -1,3 +1,8 @@
 {
-    "al.defaultLaunchConfigurationName": "Your own server"
+    "al.defaultLaunchConfigurationName": "Your own server",
+    "al.assemblyProbingPaths": [
+        "./.netpackages",
+        "C:\\Windows\\Assembly",
+        " C:\\Program Files\\Microsoft Dynamics 365 Business Central\\160\\Service\\Add-ins"
+    ]
 }

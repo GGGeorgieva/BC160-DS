@@ -5,224 +5,76 @@ tableextension 46015612 "Item Journal Line Extension" extends "Item Journal Line
     fields
     {
 
-        //Unsupported feature: CodeModification on ""Item No."(Field 3).OnValidate". Please convert manually.
-
-        //trigger "(Field 3)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if "Item No." <> xRec."Item No." then begin
-          "Variant Code" := '';
-          "Bin Code" := '';
-          if CurrFieldNo <> 0 then
-        #5..32
-        "Item Category Code" := Item."Item Category Code";
-        "Product Group Code" := Item."Product Group Code";
-
-        if ("Value Entry Type" <> "Value Entry Type"::"Direct Cost") or
-           ("Item Charge No." <> '')
-        then begin
-        #39..70
-          "Entry Type"::Consumption,
-          "Entry Type"::"Assembly Consumption":
-            "Unit Amount" := UnitCost;
-          "Entry Type"::Sale:
-            SalesPriceCalcMgt.FindItemJnlLinePrice(Rec,FIELDNO("Item No."));
-          "Entry Type"::Transfer:
+        modify("Item No.")
+        {
+            trigger OnBeforeValidate()
             begin
-              "Unit Amount" := 0;
-        #79..148
-
-        OnBeforeVerifyReservedQty(Rec,xRec,FIELDNO("Item No."));
-        ReserveItemJnlLine.VerifyChange(Rec,xRec);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        if "Item No." <> xRec."Item No." then begin
-
-          //NAVBG11.0; 001; begin
-          if LocalizationUsage.UseEastLocalization then
-              DeleteExciseLabels(true);
-          //NAVBG11.0; 001; end
-
-        #2..35
-        //NAVE111.0; 001; begin
-        if ("Item No." <> xRec."Item No.") and LocalizationUsage.UseEastLocalization then begin
-          "Tariff No." := Item."Tariff No.";
-          "Net Weight" := Item."Net Weight";
-          "Country/Region of Origin Code" := Item."Country/Region of Origin Code";
-        end;
-        //NAVE111.0; 001; end
-
-        #36..73
-
-          //NAVE111.0; 001; begin
-          "Entry Type"::"Negative Adjmt." :
-            begin
-              if LocalizationUsage.UseEastLocalization then begin
-                Product := Item.Product;
-                "Calculate Excise" := false;
-                "Calculate Product Tax" := false;
-                GetUnitExcise;
-                GetUnitProductTax;
-                "Unit Amount" := UnitCost;
-              end;
+                DeleteExciseLabels(true);
+                IF Item."No." <> "Item No." THEN
+                    Item.GET("Item No.");
+                if ("Item No." <> xRec."Item No.") then begin
+                    "Tariff No." := Item."Tariff No.";
+                    "Net Weight" := Item."Net Weight";
+                    "Country/Region of Origin Code" := Item."Country/Region of Origin Code";
+                end;
+                case "Entry Type" of
+                    "Entry Type"::"Negative Adjmt.":
+                        begin
+                            Product := Item.Product;
+                            "Calculate Excise" := false;
+                            "Calculate Product Tax" := false;
+                            GetUnitExcise;
+                            GetUnitProductTax;
+                            //TODO
+                            //"Unit Amount" := UnitCost;                  
+                        end;
+                    "Entry Type"::Sale:
+                        begin
+                            "Calculate Excise" := Item."Excise Item";
+                            "Calculate Product Tax" := Item."Product Tax Item";
+                            GetUnitExcise;
+                            GetUnitProductTax;
+                        end;
+                end;
             end;
-          //NAVE111.0; 001; end
-
-          "Entry Type"::Sale:
-
-            //NAVE111.0; 001; begin
+        }
+        modify("Entry Type")
+        {
+            trigger OnBeforeValidate()
             begin
-              if LocalizationUsage.UseEastLocalization then begin
-                Product := Item.Product;
-                "Calculate Excise" := Item."Excise Item";
-                "Calculate Product Tax" := Item."Product Tax Item";
-                GetUnitExcise;
-                GetUnitProductTax;
-              end;
-            //NAVE111.0; 001; end
-
-            SalesPriceCalcMgt.FindItemJnlLinePrice(Rec,FIELDNO("Item No."));
-
-            //NAVE111.0; 001; single
+                if xRec."Entry Type" <> "Entry Type" then
+                    ModifyExciseLabels(FIELDCAPTION("Entry Type"));
             end;
-
-        #76..151
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Entry Type"(Field 5).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if not ("Entry Type" in ["Entry Type"::"Positive Adjmt.","Entry Type"::"Negative Adjmt."]) then
-          TESTFIELD("Phys. Inventory",false);
-
-        if CurrFieldNo <> 0 then
-          WMSManagement.CheckItemJnlLineFieldChange(Rec,xRec,FIELDCAPTION("Entry Type"));
-
-        #7..37
-          Type := Type::" ";
-
-        ReserveItemJnlLine.VerifyChange(Rec,xRec);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..3
-        //NAVBG11.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if xRec."Entry Type" <> "Entry Type" then
-            ModifyExciseLabels(FIELDCAPTION("Entry Type"));
-        //NAVBG11.0; 001; end
-
-        #4..40
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""Document No."(Field 7)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVBG11.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if xRec."Document No." <> "Document No." then
-            ModifyExciseLabels(FIELDCAPTION("Document No."));
-        //NAVBG11.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on "Quantity(Field 13).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if ("Entry Type" <= "Entry Type"::Transfer) and (Quantity <> 0) then
-          TESTFIELD("Item No.");
-
-        #4..28
-
-        CheckItemAvailable(FIELDNO(Quantity));
-
-        if "Entry Type" = "Entry Type"::Transfer then begin
-          "Qty. (Calculated)" := 0;
-          "Qty. (Phys. Inventory)" := 0;
-        #35..40
-
-        if Item."Item Tracking Code" <> '' then
-          ReserveItemJnlLine.VerifyQuantity(Rec,xRec);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..31
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          ReadGLSetup;
-          if GLSetup."Mark Neg. Qty as Correction" then
-            "G/L Correction" := (Quantity < 0) or ("Invoiced Quantity" < 0);
-        end;
-        //NAVE111.0; 001; end
-
-        #32..43
-
-        //NAVBG11.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if xRec."Document No." <> "Document No." then
-            ModifyExciseLabels(FIELDCAPTION("Document No."));
-        //NAVBG11.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Inventory Value (Revalued)"(Field 5803).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD("Value Entry Type","Value Entry Type"::Revaluation);
-        VALIDATE(Amount,"Inventory Value (Revalued)" - "Inventory Value (Calculated)");
-        ReadGLSetup;
-        if ("Unit Cost (Revalued)" <> xRec."Unit Cost (Revalued)") or
-           ("Inventory Value (Revalued)" <> xRec."Inventory Value (Revalued)")
-        then begin
-        #7..10
-          if CurrFieldNo <> 0 then
-            ClearSingleAndRolledUpCosts;
-        end
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..3
-
-        //NAVE111.0; 001; begin
-        if GLSetup."Mark Neg. Qty as Correction" and LocalizationUsage.UseEastLocalization then
-          "G/L Correction" := Amount < 0;
-        //NAVE111.0; 001; end
-
-        #4..13
-        */
-        //end;
+        }
+        modify("Document No.")
+        {
+            trigger OnBeforeValidate()
+            begin
+                if xRec."Document No." <> "Document No." then
+                    ModifyExciseLabels(FIELDCAPTION("Document No."));
+            end;
+        }
+        modify(Quantity)
+        {
+            trigger OnBeforeValidate()
+            begin
+                GLSetup.GET;
+                if GLSetup."Mark Neg. Qty as Correction" then
+                    "G/L Correction" := (Quantity < 0) or ("Invoiced Quantity" < 0);
+                if xRec."Document No." <> "Document No." then
+                    ModifyExciseLabels(FIELDCAPTION("Document No."));
+            end;
+        }
+        modify("Inventory Value (Revalued)")
+        {
+            trigger OnAfterValidate()
+            begin
+                if GLSetup."Mark Neg. Qty as Correction" then begin
+                    "G/L Correction" := Amount < 0;
+                    MODIFY;
+                end;
+            end;
+        }
         field(46015505; "Unit Excise"; Decimal)
         {
             Caption = 'Unit Excise';
@@ -272,8 +124,7 @@ tableextension 46015612 "Item Journal Line Extension" extends "Item Journal Line
 
             trigger OnValidate();
             begin
-                //TO DO
-                //GetUnitExcise;
+                GetUnitExcise;
             end;
         }
         field(46015511; "Unit Product Tax"; Decimal)
@@ -320,8 +171,7 @@ tableextension 46015612 "Item Journal Line Extension" extends "Item Journal Line
 
             trigger OnValidate();
             begin
-                //TO DO
-                //GetUnitProductTax;
+                GetUnitProductTax;
             end;
         }
         field(46015516; "Transport Country/Region Code"; Code[10])
@@ -475,46 +325,159 @@ tableextension 46015612 "Item Journal Line Extension" extends "Item Journal Line
         */
     }
 
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    ReserveItemJnlLine.DeleteLine(Rec);
-
-    CALCFIELDS("Reserved Qty. (Base)");
-    TESTFIELD("Reserved Qty. (Base)",0);
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..4
-
-    //NAVBG11.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      DeleteExciseLabels(false);
-    //NAVBG11.0; 001; end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         ProdOrder: Record "Production Order";
         ProdOrderLine: Record "Prod. Order Line";
         ProdOrderComp: Record "Prod. Order Component";
         ProdOrderRtngLine: Record "Prod. Order Routing Line";
         StatReportingSetup: Record "Stat. Reporting Setup";
+        GLSetup: Record "General Ledger Setup";
+        UOMMgt: Codeunit "Unit of Measure Management";
+        Item: Record Item;
         Text46012225: Label '%1 is required for Item %2.';
         Text46012226: Label '"This action will lead to the loosing excise labels data that is specified for this sales line.\Do you want to continue?  "';
         Text46012227: Label 'If you change %1, the existing excise labels lines will be deleted and new excise labels lines based on the new information on the item journal line will be created.\Do you want to change %1.';
+
+
+    trigger OnBeforeDelete()
+    begin
+        DeleteExciseLabels(false);
+    end;
+
+    procedure GetUnitExcise();
+    begin
+        IF Item."No." <> "Item No." THEN
+            Item.GET("Item No.");
+
+        if "Calculate Excise" then begin
+            "Qty. per Unit of Measure" := UOMMgt.GetQtyPerUnitOfMeasure(Item, "Unit of Measure Code");
+
+            VALIDATE("Unit Excise", Item."Unit Excise (LCY)" * "Qty. per Unit of Measure");
+        end else
+            VALIDATE("Unit Excise", 0);
+    end;
+
+    procedure GetUnitProductTax();
+    var
+        ItemUnitOfMeasure: Record "Item Unit of Measure";
+    begin
+        IF Item."No." <> "Item No." THEN
+            Item.GET("Item No.");
+        if "Calculate Product Tax" then begin
+            if ItemUnitOfMeasure.GET(Item."No.", "Unit of Measure Code") then
+                VALIDATE("Unit Product Tax", ItemUnitOfMeasure."Product Tax (LCY)")
+            else
+                VALIDATE("Unit Product Tax", 0);
+        end else
+            VALIDATE("Unit Product Tax", 0);
+    end;
+
+    procedure CheckIntrastat();
+    begin
+        if "Intrastat Transaction" then begin
+            StatReportingSetup.GET;
+            if StatReportingSetup."Transaction Type Mandatory" and ("Transaction Type" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Transaction Type"), "Item No.");
+            if StatReportingSetup."Transaction Spec. Mandatory" and ("Transaction Specification" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Transaction Specification"), "Item No.");
+            if StatReportingSetup."Transport Method Mandatory" and ("Transport Method" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Transport Method"), "Item No.");
+            if StatReportingSetup."Shipment Method Mandatory" and ("Shipment Method Code" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Shipment Method Code"), "Item No.");
+            if StatReportingSetup."Tariff No. Mandatory" and ("Tariff No." = '') then
+                ERROR(Text46012225, FIELDCAPTION("Tariff No."), "Item No.");
+            if StatReportingSetup."Net Weight Mandatory" and ("Net Weight" = 0) then
+                ERROR(Text46012225, FIELDCAPTION("Net Weight"), "Item No.");
+            if StatReportingSetup."Country/Region of Origin Mand." and ("Country/Region of Origin Code" = '') then
+                ERROR(Text46012225, FIELDCAPTION("Country/Region of Origin Code"), "Item No.");
+        end;
+    end;
+
+    procedure ShowExciseLabels();
+    var
+        ExciseLabel: Record "Excise Label";
+        Item2: Record Item;
+    begin
+        Item2.GET("Item No.");
+        Item2.TESTFIELD("Excise Item");
+        TESTFIELD(Quantity);
+
+        ExciseLabel.RESET;
+        ExciseLabel.FILTERGROUP := 2;
+        ExciseLabel.SETRANGE("Entry Type", "Entry Type");
+        ExciseLabel.SETRANGE("Journal Template Name", "Journal Template Name");
+        ExciseLabel.SETRANGE("Journal Batch Name", "Journal Batch Name");
+        ExciseLabel.SETRANGE("Document No.", "Document No.");
+        ExciseLabel.SETRANGE("Document Line No.", "Line No.");
+        ExciseLabel.FILTERGROUP := 0;
+        //TODO
+        //PAGE.RUNMODAL(PAGE::Page46015717,ExciseLabel);
+    end;
+
+    procedure DeleteExciseLabels(IsWarning: Boolean);
+    var
+        ExciseLabel: Record "Excise Label";
+    begin
+        ExciseLabel.RESET;
+        ExciseLabel.SETRANGE("Entry Type", "Entry Type");
+        ExciseLabel.SETRANGE("Journal Template Name", "Journal Template Name");
+        ExciseLabel.SETRANGE("Journal Batch Name", "Journal Batch Name");
+        ExciseLabel.SETRANGE("Document No.", "Document No.");
+        ExciseLabel.SETRANGE("Document Line No.", "Line No.");
+
+        if ExciseLabel.FINDFIRST then begin
+            if IsWarning and (not CONFIRM(Text46012226, false)) then
+                ERROR('');
+
+            ExciseLabel.DELETEALL;
+        end;
+    end;
+
+    procedure UpdateExciseLabels();
+    var
+        ExciseLabel: Record "Excise Label";
+    begin
+        ExciseLabel.RESET;
+        ExciseLabel.SETRANGE("Entry Type", "Entry Type");
+        ExciseLabel.SETRANGE("Journal Template Name", "Journal Template Name");
+        ExciseLabel.SETRANGE("Journal Batch Name", "Journal Batch Name");
+        ExciseLabel.SETRANGE("Document No.", "Document No.");
+        ExciseLabel.SETRANGE("Document Line No.", "Line No.");
+
+        if ExciseLabel.FINDFIRST then begin
+            repeat
+                ExciseLabel."Posting Date" := "Posting Date";
+                ExciseLabel.MODIFY;
+            until ExciseLabel.NEXT = 0;
+        end;
+    end;
+
+    procedure ModifyExciseLabels(FieldCaption: Text[30]);
+    var
+        ExciseLabel2: Record "Excise Label";
+        ExciseLabel: Record "Excise Label";
+    begin
+        ExciseLabel.RESET;
+        ExciseLabel.SETRANGE("Entry Type", xRec."Entry Type");
+        ExciseLabel.SETRANGE("Journal Template Name", xRec."Journal Template Name");
+        ExciseLabel.SETRANGE("Journal Batch Name", xRec."Journal Batch Name");
+        ExciseLabel.SETRANGE("Document Line No.", xRec."Line No.");
+        ExciseLabel.SETRANGE("Document No.", xRec."Document No.");
+
+        if ExciseLabel.FINDFIRST then begin
+            if not CONFIRM(Text46012227, false, FieldCaption) then
+                ERROR('');
+
+            repeat
+                ExciseLabel2.INIT;
+                ExciseLabel2.TRANSFERFIELDS(ExciseLabel);
+                ExciseLabel2."Entry Type" := "Entry Type";
+                ExciseLabel2."Document No." := "Document No.";
+                ExciseLabel2.INSERT;
+            until ExciseLabel.NEXT = 0;
+
+            ExciseLabel.DELETEALL;
+        end;
+    end;
 }
 

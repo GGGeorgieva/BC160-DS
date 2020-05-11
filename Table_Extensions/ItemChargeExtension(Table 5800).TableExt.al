@@ -11,11 +11,8 @@ tableextension 46015586 "Item Charge Extension" extends "Item Charge"
 
             trigger OnValidate();
             begin
-                //TO DO
-                /*
                 if "Incl. in Intrastat Amount" then
-                  CheckIncludeIntrastat;
-                */
+                    CheckIncludeIntrastat;
             end;
         }
         field(46015606; "Incl. in Intrastat Stat. Value"; Boolean)
@@ -25,19 +22,17 @@ tableextension 46015586 "Item Charge Extension" extends "Item Charge"
 
             trigger OnValidate();
             begin
-                //TO DO
-                /*
                 if "Incl. in Intrastat Stat. Value" then
-                  CheckIncludeIntrastat;
-                  */
+                    CheckIncludeIntrastat;
             end;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
+    procedure CheckIncludeIntrastat();
+    var
+        StatReportingSetup: Record "Stat. Reporting Setup";
+    begin
+        StatReportingSetup.GET;
+        StatReportingSetup.TESTFIELD("No Item Charges in Intrastat", false);
+    end;
 }
 

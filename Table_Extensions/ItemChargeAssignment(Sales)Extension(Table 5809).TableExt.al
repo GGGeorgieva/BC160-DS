@@ -11,8 +11,7 @@ tableextension 46015590 "ItemChAssignment(Sales)Ext." extends "Item Charge Assig
 
             trigger OnValidate();
             begin
-                //TO DO
-                //CheckIncludeIntrastat;
+                CheckIncludeIntrastat;
             end;
         }
         field(46015607; "Incl. in Intrastat Stat. Value"; Boolean)
@@ -22,16 +21,61 @@ tableextension 46015590 "ItemChAssignment(Sales)Ext." extends "Item Charge Assig
 
             trigger OnValidate();
             begin
-                //TO DO
-                //CheckIncludeIntrastat;
+                CheckIncludeIntrastat;
             end;
         }
     }
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
+    procedure CheckIncludeIntrastat();
+    var
+        StatReportingSetup: Record "Stat. Reporting Setup";
+    begin
+        StatReportingSetup.GET;
+        StatReportingSetup.TESTFIELD("No Item Charges in Intrastat", false);
+    end;
 
+    PROCEDURE SetIncludeAmount(): Boolean;
+    var
+        SalesHeader: Record "Sales Header";
+        CustomerNo: Code[20];
+    begin
+        if SalesHeader.GET("Document Type", "Document No.") then begin
+            CustomerNo := GetCustomer;
 
-    //Unsupported feature: PropertyChange. Please convert manually.
+            if (CustomerNo <> '') and (SalesHeader."Sell-to Customer No." = CustomerNo) then
+                exit(true);
+        end;
 
+        exit(false);
+    end;
+
+    local procedure GetCustomer(): Code[20];
+    var
+        SalesHeader: Record "Sales Header";
+        ReturnRcptHeader: Record "Return Receipt Header";
+        SalesShptHeader: Record "Sales Shipment Header";
+        CustomerNo: Code[20];
+    begin
+        case "Applies-to Doc. Type" of
+            "Applies-to Doc. Type"::Order, "Applies-to Doc. Type"::Invoice,
+            "Applies-to Doc. Type"::"Return Order", "Applies-to Doc. Type"::"Credit Memo":
+                begin
+                    SalesHeader.GET("Applies-to Doc. Type", "Applies-to Doc. No.");
+                    CustomerNo := SalesHeader."Sell-to Customer No.";
+                end;
+            "Applies-to Doc. Type"::Shipment:
+                begin
+                    SalesShptHeader.GET("Applies-to Doc. No.");
+                    CustomerNo := SalesShptHeader."Sell-to Customer No.";
+                end;
+            "Applies-to Doc. Type"::"Return Receipt":
+                begin
+                    ReturnRcptHeader.GET("Applies-to Doc. No.");
+                    CustomerNo := ReturnRcptHeader."Sell-to Customer No.";
+                end;
+        end;
+
+        exit(CustomerNo);
+    end;
 }
 

@@ -109,14 +109,14 @@ tableextension 46015536 "Item Extension" extends Item
         }
     }
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         ItemPackagingSpecification: Record "Item Packaging Specification";
+
+    trigger OnAfterDelete()
+    begin
+        ItemPackagingSpecification.SETRANGE("Item No.", "No.");
+        ItemPackagingSpecification.DELETEALL;
+    end;
 
 }
 

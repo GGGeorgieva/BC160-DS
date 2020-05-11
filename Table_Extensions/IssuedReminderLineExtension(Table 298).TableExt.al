@@ -23,11 +23,5 @@ tableextension 46015546 "Issued Reminder Line Ext." extends "Issued Reminder Lin
             FieldClass = FlowField;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

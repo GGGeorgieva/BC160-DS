@@ -78,21 +78,5 @@ tableextension 46015569 "Invoice Post. Buffer Extension" extends "Invoice Post. 
             Editable = false;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
-    var
-        GenPostingSetup: Record "General Posting Setup";
-        SalesHeader: Record "Sales Header";
-
-    var
-        "++++++++": Integer;
-        PurchHeader: Record "Purchase Header";
-
-
 }
 

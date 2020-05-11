@@ -33,11 +33,5 @@ tableextension 46015551 "IssuedFinChMemoLineExtension" extends "Issued Fin. Char
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

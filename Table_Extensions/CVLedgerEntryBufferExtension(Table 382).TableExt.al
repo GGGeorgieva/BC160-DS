@@ -4,6 +4,7 @@ tableextension 46015563 "CV Ledg. Entry Buff. Extension" extends "CV Ledger Entr
 
     keys
     {
+        //TODO
         /*key(Key1; "Document Date", "Currency Code")
         {
         }

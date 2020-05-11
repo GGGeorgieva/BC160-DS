@@ -52,12 +52,6 @@ tableextension 46015541 "Customer Bank Acc. Extension" extends "Customer Bank Ac
         }
     }
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         BGUtils: Codeunit "BG Utils";
         LocalBank: Record "Local Bank";

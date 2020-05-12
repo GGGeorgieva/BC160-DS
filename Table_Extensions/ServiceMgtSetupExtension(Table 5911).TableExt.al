@@ -1,7 +1,5 @@
 tableextension 46015597 "Service Mgt. Setup Extension" extends "Service Mgt. Setup"
 {
-    // version NAVW111.00,NAVE111.0
-
     fields
     {
         field(46015609; "Default VAT Date"; Option)
@@ -36,11 +34,5 @@ tableextension 46015597 "Service Mgt. Setup Extension" extends "Service Mgt. Set
             TableRelation = "Posting Description" WHERE(Type = CONST("Service Document"));
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

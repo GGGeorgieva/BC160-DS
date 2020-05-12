@@ -1,7 +1,5 @@
 tableextension 46015529 "Source Code Setup Extension" extends "Source Code Setup"
 {
-    // version NAVW111.00,NAVE111.0,NAVBG11.0
-
     fields
     {
         field(46015505; "VAT Protocol"; Code[10])
@@ -17,11 +15,5 @@ tableextension 46015529 "Source Code Setup Extension" extends "Source Code Setup
             TableRelation = "Source Code";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

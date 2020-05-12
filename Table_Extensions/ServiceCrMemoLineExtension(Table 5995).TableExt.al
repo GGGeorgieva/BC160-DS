@@ -10,11 +10,5 @@ tableextension 46015604 "Service Cr.Memo Line Ext." extends "Service Cr.Memo Lin
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

@@ -1,7 +1,5 @@
 tableextension 46015596 "Service Invoice Line Ext." extends "Service Invoice Line"
 {
-    // version NAVW111.00,NAVE111.0
-
     fields
     {
         field(46015610; "VAT Date"; Date)
@@ -10,11 +8,5 @@ tableextension 46015596 "Service Invoice Line Ext." extends "Service Invoice Lin
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

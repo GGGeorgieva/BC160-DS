@@ -1,7 +1,5 @@
 tableextension 46015617 "Shipment Method Extension" extends "Shipment Method"
 {
-    // version NAVW111.00,NAVE111.0
-
     fields
     {
         field(46015605; "Include Item Charges"; Boolean)
@@ -13,8 +11,7 @@ tableextension 46015617 "Shipment Method Extension" extends "Shipment Method"
             begin
                 if "Include Item Charges" then begin
                     TESTFIELD("Adjustment %", 0);
-                    //TO DO
-                    //CheckIncludeIntrastat;
+                    CheckIncludeIntrastat;
                 end;
             end;
         }
@@ -32,11 +29,13 @@ tableextension 46015617 "Shipment Method Extension" extends "Shipment Method"
             end;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
+    PROCEDURE CheckIncludeIntrastat();
+    VAR
+        StatReportingSetup: Record "Stat. Reporting Setup";
+    BEGIN
+        //NAVE111.0; 001; entire function
+        StatReportingSetup.GET;
+        StatReportingSetup.TESTFIELD("No Item Charges in Intrastat", false);
+    END;
 }
 

@@ -1,7 +1,5 @@
 tableextension 46015594 "Transfer Receipt Header Ext." extends "Transfer Receipt Header"
 {
-    // version NAVW111.00.00.20783,NAVBG11.0
-
     fields
     {
         field(46015505; "Excise Tax Document No."; Code[20])
@@ -70,58 +68,17 @@ tableextension 46015594 "Transfer Receipt Header Ext." extends "Transfer Receipt
         }
     }
 
-
-    //Unsupported feature: CodeInsertion on "OnDelete". Please convert manually.
-
-    //trigger (Variable: LocalizationUsage)();
-    //Parameters and return type have not been exported.
-    //begin
-    /*
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    TransRcptLine.SETRANGE("Document No.","No.");
-    if TransRcptLine.FIND('-') then
-      repeat
-    #4..10
-    ItemTrackingMgt.DeleteItemEntryRelation(
-      DATABASE::"Transfer Receipt Line",0,"No.",'',0,0,true);
-
-    MoveEntries.MoveDocRelatedEntries(DATABASE::"Transfer Receipt Header","No.");
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..13
-    //NAVBG11.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type",ExciseTaxDoc."Document Type"::"Posted Transfer Receipt");
-      ExciseTaxDoc.DELETEALL;
+    trigger OnBeforeDelete();
+    begin
+        ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", ExciseTaxDoc."Document Type"::"Posted Transfer Receipt");
+        ExciseTaxDoc.DELETEALL;
     end;
-    //NAVBG11.0; 001; end
-    MoveEntries.MoveDocRelatedEntries(DATABASE::"Transfer Receipt Header","No.");
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 
     var
         ExciseTaxDoc: Record "Excise Tax Document";
+
 
 }
 

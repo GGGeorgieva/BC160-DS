@@ -1,51 +1,32 @@
 tableextension 46015584 "Transfer Header Extension" extends "Transfer Header"
 {
-    // version NAVW111.00.00.27667,NAVE111.0,NAVBG11.0
-
     fields
     {
+        modify("Transfer-from Code")
+        {
+            trigger OnAfterValidate()
+            var
+                Confirmed: Boolean;
+                HideValidationDialog: Boolean;
+            begin
+                SetHideValidationDialog(HideValidationDialog);
 
-        //Unsupported feature: CodeModification on ""Transfer-from Code"(Field 2).OnValidate". Please convert manually.
+                if xRec."Transfer-from Code" <> "Transfer-from Code" then begin
+                    if ((HideValidationDialog) or (xRec."Transfer-from Code" = '')) then
+                        Confirmed := true;
+                    if Confirmed then begin
+                        ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+                        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+                        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", "Excise Tax Document Type");
+                        if ExciseTaxDoc.FINDFIRST then begin
+                            ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Transfer-From Code", "Transfer-from Code");
+                            ExciseTaxDoc.MODIFY;
+                        end;
+                    end;
+                end;
+            end;
+        }
 
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TestStatusOpen;
-
-        if ("Transfer-from Code" = "Transfer-to Code") and
-        #4..57
-            TransLine.SETRANGE("Document No.","No.");
-            if TransLine.FINDSET then
-              TransLine.DELETEALL(true);
-          end else
-            "Transfer-from Code" := xRec."Transfer-from Code";
-        end;
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..60
-
-              //NAVBG11.0; 001; begin
-              if LocalizationUsage.UseEastLocalization then begin
-                  ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-                  ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-                  ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type","Excise Tax Document Type");
-                  if ExciseTaxDoc.FINDFIRST then begin
-                    ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Transfer-From Code","Transfer-from Code");
-                    ExciseTaxDoc.MODIFY;
-                  end;
-              end;
-              //NAVBG11.0; 001; end
-          end else
-
-            "Transfer-from Code" := xRec."Transfer-from Code";
-        end;
-        */
-        //end;
         field(46015505; "Excise Tax Document No."; Code[20])
         {
             Caption = 'Excise Tax Document No.';
@@ -53,9 +34,8 @@ tableextension 46015584 "Transfer Header Extension" extends "Transfer Header"
             trigger OnValidate();
             var
                 SalesSetup: Record "Sales & Receivables Setup";
+                NoSeriesMgt: Codeunit NoSeriesManagement;
             begin
-                //TO DO
-                /*
                 if "Excise Tax Document No." <> xRec."Excise Tax Document No." then begin
                     SalesSetup.GET;
                     NoSeriesMgt.TestManual(SalesSetup."Excise Tax Document Nos.");
@@ -63,7 +43,6 @@ tableextension 46015584 "Transfer Header Extension" extends "Transfer Header"
                     ExciseTaxDoc.ValidateWithTransferValues(Rec);
                 end else
                     ExciseTaxDoc.ValidateWithTransferValues(Rec);
-                */
             end;
         }
         field(46015506; "Excise Document Date"; Date)
@@ -139,14 +118,24 @@ tableextension 46015584 "Transfer Header Extension" extends "Transfer Header"
             TableRelation = "Excise Charge Ground";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         ExciseTaxDoc: Record "Excise Tax Document";
+
+    PROCEDURE IsIntrastatTransaction() IsIntrastat: Boolean;
+    VAR
+        CountryRegion: Record "Country/Region";
+        CompanyInfo: Record "Company Information";
+    BEGIN
+        //NAVE111.0; 001; entire function
+        if "Trsf.-from Country/Region Code" = "Trsf.-to Country/Region Code" then
+            exit(false);
+
+        CompanyInfo.GET;
+        if "Trsf.-from Country/Region Code" in ['', CompanyInfo."Country/Region Code"] then
+            exit(CountryRegion.IsIntrastat("Trsf.-to Country/Region Code", false));
+        if "Trsf.-to Country/Region Code" in ['', CompanyInfo."Country/Region Code"] then
+            exit(CountryRegion.IsIntrastat("Trsf.-from Country/Region Code", false));
+        exit(false);
+    END;
 }
 

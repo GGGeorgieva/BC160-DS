@@ -188,11 +188,76 @@ tableextension 46015510 "Sales Invoice Line Extension" extends "Sales Invoice Li
             Description = 'NAVE111.0,001';
         }
     }
+    procedure CopyToVATProtocolLine(SalesInvHeader: Record "Sales Invoice Header"; VAR VATProtocolLine: Record "VAT Protocol Line");
+    var
+        CurrExchRate: Record "Currency Exchange Rate";
+    begin
+        //NAVE111.0; 001; entire function
+        VATProtocolLine."VAT Prod. Posting Group" := "VAT Prod. Posting Group";
+        //TODO: Create Vat Prot. Line Type enum
+        VATProtocolLine.Type := Type;
+        VATProtocolLine."No." := "No.";
+        VATProtocolLine.Description := Description;
+        VATProtocolLine."Description 2" := "Description 2";
+        VATProtocolLine."Unit of Measure Code" := "Unit of Measure Code";
+        VATProtocolLine.Quantity := Quantity;
+        if SalesInvHeader."Currency Code" = '' then
+            VATProtocolLine."VAT Base Amount (LCY)" := "Amount Incl. Taxes Excl. VAT"
+        else
+            VATProtocolLine."VAT Base Amount (LCY)" :=
+              CurrExchRate.ExchangeAmtFCYToLCY(
+                SalesInvHeader."Posting Date", SalesInvHeader."Currency Code",
+                "Amount Incl. Taxes Excl. VAT", SalesInvHeader."Currency Factor");
+    end;
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
+    procedure ExciseLabels();
+    var
+        ExciseLabelLedgerEntry: Record "Excise Label Ledger Entry";
+        ItemLedgEntryNo: Integer;
+    begin
+        TESTFIELD(Type, 2);
+        TESTFIELD(Quantity);
 
+        ExciseLabelLedgerEntry.FILTERGROUP := 2;
+        ExciseLabelLedgerEntry.SETRANGE("Entry Type", ExciseLabelLedgerEntry."Entry Type"::Sale);
+        ExciseLabelLedgerEntry.SETRANGE("Item Ledger Entry No.", FindItemLedgEntryNo);
+        ExciseLabelLedgerEntry.FILTERGROUP := 0;
+        //TODO: After adding the page
+        //PAGE.RUNMODAL(PAGE::Page46015718,ExciseLabelLedgerEntry);
+    end;
 
-    //Unsupported feature: PropertyChange. Please convert manually.
+    procedure FindItemLedgEntryNo(): Integer;
+    var
+        ValueEntry: Record "Value Entry";
+        SalesInvLine: Record "Sales Invoice Line";
+        LineCount: Integer;
+    begin
+        ValueEntry.SETRANGE("Document No.", "Document No.");
+        ValueEntry.SETRANGE("Item Ledger Entry Type", ValueEntry."Item Ledger Entry Type"::Sale);
+        ValueEntry.SETRANGE("Item No.", "No.");
+        ValueEntry.SETRANGE("Source No.", "Sell-to Customer No.");
+        ValueEntry.SETRANGE("Location Code", "Location Code");
+        ValueEntry.SETRANGE("Item Ledger Entry Quantity", -Quantity);
+
+        if ValueEntry.FINDFIRST then begin
+            if ValueEntry.COUNT > 1 then begin
+                SalesInvLine.SETRANGE("Document No.", "Document No.");
+                SalesInvLine.SETRANGE("No.", "No.");
+                SalesInvLine.SETRANGE("Location Code", "Location Code");
+                SalesInvLine.SETRANGE(Quantity, Quantity);
+                if SalesInvLine.FINDFIRST then
+                    repeat
+                        LineCount := LineCount + 1;
+                    until (SalesInvLine."Line No." = "Line No.") or (SalesInvLine.NEXT = 0);
+
+                ValueEntry.NEXT(LineCount - 1);
+            end;
+
+            exit(ValueEntry."Item Ledger Entry No.");
+        end;
+
+        exit(0);
+    end;
 
 }
 

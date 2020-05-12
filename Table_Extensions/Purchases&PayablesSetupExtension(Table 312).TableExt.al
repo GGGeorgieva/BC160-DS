@@ -78,11 +78,5 @@ tableextension 46015553 "Purch. & Pay. Setup Ext." extends "Purchases & Payables
             TableRelation = "VAT Business Posting Group".Code;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

@@ -64,12 +64,75 @@ tableextension 46015516 "Purch. Inv. Line Extension" extends "Purch. Inv. Line"
             Editable = false;
         }
     }
+    procedure CopyToVATProtocolLine(PurchInvHeader: Record "Purch. Inv. Header"; var VATProtocolLine: Record "VAT Protocol Line");
+    var
+        CurrExchRate: Record "Currency Exchange Rate";
+    begin
+        //NAVE111.0; 001; entire function
+        VATProtocolLine."VAT Prod. Posting Group" := "VAT Prod. Posting Group";
+        //TODO: Create Vat Prot. Line Type enum
+        VATProtocolLine.Type := Type;
+        VATProtocolLine."No." := "No.";
+        VATProtocolLine.Description := Description;
+        VATProtocolLine."Description 2" := "Description 2";
+        VATProtocolLine."Unit of Measure Code" := "Unit of Measure Code";
+        VATProtocolLine.Quantity := Quantity;
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
+        if PurchInvHeader."Currency Code" = '' then
+            VATProtocolLine."VAT Base Amount (LCY)" := Amount
+        else
+            VATProtocolLine."VAT Base Amount (LCY)" :=
+              CurrExchRate.ExchangeAmtFCYToLCY(
+                PurchInvHeader."Posting Date", PurchInvHeader."Currency Code", Amount, PurchInvHeader."Currency Factor");
+    end;
 
+    procedure ExciseLabels();
+    var
+        ExciseLabelLedgerEntry: Record "Excise Label Ledger Entry";
+        ItemLedgEntryNo: Integer;
+    begin
+        TESTFIELD(Type, Type::Item.AsInteger());
+        TESTFIELD(Quantity);
 
-    //Unsupported feature: PropertyChange. Please convert manually.
+        ExciseLabelLedgerEntry.FILTERGROUP := 2;
+        ExciseLabelLedgerEntry.SETRANGE("Entry Type", ExciseLabelLedgerEntry."Entry Type"::Purchase);
+        ExciseLabelLedgerEntry.SETRANGE("Item Ledger Entry No.", FindItemLedgEntryNo);
+        ExciseLabelLedgerEntry.FILTERGROUP := 0;
+        //TODO: After adding the page
+        //PAGE.RUNMODAL(PAGE::Page46015718,ExciseLabelLedgerEntry);
+    end;
 
+    procedure FindItemLedgEntryNo(): Integer;
+    var
+        ValueEntry: Record "Value Entry";
+        PurchInvLine: Record "Purch. Inv. Line";
+        LineCount: Integer;
+    begin
+        ValueEntry.SETRANGE("Document No.", "Document No.");
+        ValueEntry.SETRANGE("Item Ledger Entry Type", ValueEntry."Item Ledger Entry Type"::Purchase);
+        ValueEntry.SETRANGE("Item No.", "No.");
+        ValueEntry.SETRANGE("Source No.", "Buy-from Vendor No.");
+        ValueEntry.SETRANGE("Location Code", "Location Code");
+        ValueEntry.SETRANGE("Item Ledger Entry Quantity", Quantity);
 
+        if ValueEntry.FINDFIRST then begin
+            if ValueEntry.COUNT > 1 then begin
+                PurchInvLine.SETRANGE("Document No.", "Document No.");
+                PurchInvLine.SETRANGE("No.", "No.");
+                PurchInvLine.SETRANGE("Location Code", "Location Code");
+                PurchInvLine.SETRANGE(Quantity, Quantity);
+                if PurchInvLine.FINDFIRST then
+                    repeat
+                        LineCount := LineCount + 1;
+                    until (PurchInvLine."Line No." = "Line No.") or (PurchInvLine.NEXT = 0);
+
+                ValueEntry.NEXT(LineCount - 1);
+            end;
+
+            exit(ValueEntry."Item Ledger Entry No.");
+        end;
+
+        exit(0);
+    end;
 }
 

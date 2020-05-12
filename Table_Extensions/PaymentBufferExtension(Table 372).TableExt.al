@@ -11,11 +11,5 @@ tableextension 46015560 "Payment Buffer Extension" extends "Payment Buffer"
             TableRelation = "Vendor Posting Group";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

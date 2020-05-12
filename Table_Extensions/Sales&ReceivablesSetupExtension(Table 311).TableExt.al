@@ -132,11 +132,5 @@ tableextension 46015556 "Sales & Receivables Setup Ext." extends "Sales & Receiv
             TableRelation = "Excise Destination" WHERE("Destination Type" = CONST(Inbound));
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

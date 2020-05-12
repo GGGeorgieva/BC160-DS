@@ -57,40 +57,12 @@ tableextension 46015513 "Purch. Rcpt. Header Extension" extends "Purch. Rcpt. He
             Description = 'NAVBG11.0,001';
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    LOCKTABLE;
-    PostPurchDelete.DeletePurchRcptLines(Rec);
-
-    PurchCommentLine.SETRANGE("Document Type",PurchCommentLine."Document Type"::Receipt);
-    PurchCommentLine.SETRANGE("No.","No.");
-    PurchCommentLine.DELETEALL;
-    ApprovalsMgmt.DeletePostedApprovalEntries(RECORDID);
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      PostPurchDelete.CheckIfPurchDocDeleteAllowed("Posting Date");
-    //NAVE111.0; 001; end
-
-    #1..7
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
+    trigger OnBeforeDelete()
+    var
+        PostPurchDelete: Codeunit "PostPurch-Delete";
+    begin
+        //TODO: After adding the procedure
+        //PostPurchDelete.CheckIfPurchDocDeleteAllowed("Posting Date");
+    end;
 }
 

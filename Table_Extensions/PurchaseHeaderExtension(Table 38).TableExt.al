@@ -2,6 +2,8 @@ tableextension 46015562 "Purchase Header Extension" extends "Purchase Header"
 {
     // version NAVW111.00.00.28629,NAVE111.0,NAVBG11.0
 
+    //TODO
+
     fields
     {
 

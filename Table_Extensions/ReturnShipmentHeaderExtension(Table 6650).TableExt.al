@@ -59,39 +59,13 @@ tableextension 46015605 "Return Shipment Header Ext." extends "Return Shipment H
             TableRelation = "Custom Procedure";
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    LOCKTABLE;
-    PostPurchDelete.DeletePurchShptLines(Rec);
-
-    #4..8
-
-    if CertificateOfSupply.GET(CertificateOfSupply."Document Type"::"Return Shipment","No.") then
-      CertificateOfSupply.DELETE(true);
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    //NAVE111.0; 001; single
-    if LocalizationUsage.UseEastLocalization then
-      PostPurchDelete.CheckIfPurchDocDeleteAllowed("Posting Date");
-
-    #1..11
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
+    trigger OnBeforeDelete()
+    var
+        PostPurchDelete: codeunit "PostPurch-Delete";
+    begin
+        //TODO: After adding the procedure
+        //PostPurchDelete.CheckIfPurchDocDeleteAllowed("Posting Date");
+    end;
 
 }
 

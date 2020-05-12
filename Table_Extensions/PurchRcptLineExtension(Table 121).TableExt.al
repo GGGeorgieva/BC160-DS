@@ -29,11 +29,24 @@ tableextension 46015514 "Purch. Rcpt. Line Extension" extends "Purch. Rcpt. Line
             TableRelation = "Country/Region";
         }
     }
+    procedure ExciseLabels();
+    var
+        ExciseLabelLedgerEntry: Record "Excise Label Ledger Entry";
+    begin
+        TESTFIELD(Type, Type::Item.AsInteger());
+        TESTFIELD(Quantity);
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
+        ExciseLabelLedgerEntry.FILTERGROUP := 2;
+        ExciseLabelLedgerEntry.SETRANGE("Entry Type", ExciseLabelLedgerEntry."Entry Type"::Purchase);
+        if "Order No." <> '' then
+            ExciseLabelLedgerEntry.SETRANGE("Document Type", ExciseLabelLedgerEntry."Document Type"::Order)
+        else
+            ExciseLabelLedgerEntry.SETRANGE("Document Type", ExciseLabelLedgerEntry."Document Type"::Invoice);
+        ExciseLabelLedgerEntry.SETRANGE("Document No.", "Document No.");
+        ExciseLabelLedgerEntry.SETRANGE("Document Line No.", "Line No.");
+        ExciseLabelLedgerEntry.FILTERGROUP := 0;
+        //TODO: After adding the page
+        //PAGE.RUNMODAL(PAGE::Page46015718,ExciseLabelLedgerEntry);
+    end;
 }
 

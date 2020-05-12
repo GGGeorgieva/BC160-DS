@@ -21,11 +21,5 @@ tableextension 46015519 "Location Extension" extends Location
             Description = 'NAVBG11.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

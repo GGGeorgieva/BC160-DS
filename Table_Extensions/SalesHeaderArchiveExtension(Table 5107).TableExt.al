@@ -43,11 +43,5 @@ tableextension 46015580 "Sales Header Archive Ext." extends "Sales Header Archiv
             TableRelation = "Posting Description" WHERE(Type = CONST("Sales Document"));
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

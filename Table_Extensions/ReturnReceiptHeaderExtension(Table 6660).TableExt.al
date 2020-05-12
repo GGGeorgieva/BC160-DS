@@ -46,39 +46,12 @@ tableextension 46015601 "Return Receipt Header Ext." extends "Return Receipt Hea
             TableRelation = "Industry Code";
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    TESTFIELD("No. Printed");
-    LOCKTABLE;
-    PostSalesDelete.DeleteSalesRcptLines(Rec);
-    #4..6
-    SalesCommentLine.DELETEALL;
-
-    ApprovalsMgmt.DeletePostedApprovalEntries(RECORDID);
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    //NAVE111.0; 001; single
-    if LocalizationUsage.UseEastLocalization then
-      PostSalesDelete.CheckIfSalesDocDeleteAllowed("Posting Date");
-
-    #1..9
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
+    trigger OnBeforeDelete()
+    var
+        PostSalesDelete: codeunit "PostSales-Delete";
+    begin
+        //TODO: After adding the procedure
+        //PostSalesDelete.CheckIfSalesDocDeleteAllowed("Posting Date");
+    end;
 }
 

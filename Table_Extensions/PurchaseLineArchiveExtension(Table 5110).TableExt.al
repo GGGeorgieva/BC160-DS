@@ -10,11 +10,5 @@ tableextension 46015573 "Purchase Line Archive Ext." extends "Purchase Line Arch
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

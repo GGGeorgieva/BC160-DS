@@ -2,6 +2,8 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
 {
     // version NAVW111.00.00.28629,NAVE110.0,NAVBG10.0
 
+    //TODO
+
     fields
     {
 
@@ -700,7 +702,7 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
             var
                 lRecSalesLine: Record "Sales Line";
             begin
-                //TO DO
+                //TODO
                 /*
                 if "Excise Tax Document No." <> xRec."Excise Tax Document No." then begin
                     SalesSetup.GET;
@@ -863,7 +865,7 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
 
             trigger OnValidate();
             begin
-                //TO DO
+                //TODO
                 /*
                 GLSetup.GET;
                 if not GLSetup."Use VAT Date" then
@@ -901,7 +903,7 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
                     IBAN := BankAcc.IBAN;
                     "Bank Code" := BankAcc."Bank Code";
                 end else begin
-                    //To DO
+                    //TODO
                     /*
                       CompanyInfo.GET;
                       "Bank Name" := CompanyInfo."Bank Name";
@@ -954,7 +956,7 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
 
             trigger OnValidate();
             begin
-                //TO DO
+                //TODO
                 /*
                 if "Posting Desc. Code" <> '' then
                     "Posting Description" := GetPostingDescription(Rec);
@@ -973,7 +975,7 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
 
             trigger OnValidate();
             begin
-                //TO DO                
+                //TODO                
                 //CompanyInfo.CheckIBAN(IBAN);
             end;
         }
@@ -983,7 +985,7 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
             Description = 'NAVE110.0,001';
             //This property is currently not supported
             //TestTableRelation = true;
-            //TO DO
+            //TODO
             //ValidateTableRelation = true;
         }
         field(46015637; "Identity Card No."; Code[20])

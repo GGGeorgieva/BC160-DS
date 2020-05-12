@@ -17,11 +17,25 @@ tableextension 46015598 "Return Shipment Line Extension" extends "Return Shipmen
             Numeric = true;
         }
     }
+    procedure ExciseLabels();
+    VAR
+        ExciseLabelLedgerEntry: Record "Excise Label Ledger Entry";
+    BEGIN
+        TESTFIELD(Type, Type::Item.AsInteger());
+        TESTFIELD(Quantity);
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
+        ExciseLabelLedgerEntry.FILTERGROUP := 2;
+        ExciseLabelLedgerEntry.SETRANGE("Entry Type", ExciseLabelLedgerEntry."Entry Type"::Purchase);
+        if "Return Order No." <> '' then
+            ExciseLabelLedgerEntry.SETRANGE("Document Type", ExciseLabelLedgerEntry."Document Type"::"Return Order")
+        else
+            ExciseLabelLedgerEntry.SETRANGE("Document Type", ExciseLabelLedgerEntry."Document Type"::"Credit Memo");
+        ExciseLabelLedgerEntry.SETRANGE("Document No.", "Document No.");
+        ExciseLabelLedgerEntry.SETRANGE("Document Line No.", "Line No.");
+        ExciseLabelLedgerEntry.FILTERGROUP := 0;
+        //TODO: After adding the page
+        //PAGE.RUNMODAL(PAGE::Page46015718,ExciseLabelLedgerEntry);
+    END;
 
 }
 

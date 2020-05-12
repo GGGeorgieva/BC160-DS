@@ -1,55 +1,23 @@
 tableextension 46015547 "Reminder Header Extension" extends "Reminder Header"
 {
-    // version NAVW111.00.00.27667,NAVE111.0
-
+    // version NAVW111.00.00.27667,NAVE111.0  
+    //TODO: PROCEDURE ReminderRounding
     fields
     {
 
-        //Unsupported feature: CodeModification on ""Customer No."(Field 2).OnValidate". Please convert manually.
-
-        //trigger "(Field 2)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if CurrFieldNo = FIELDNO("Customer No.") then
-          if Undo then begin
-            "Customer No." := xRec."Customer No.";
-        #4..26
-        "Shortcut Dimension 1 Code" := Cust."Global Dimension 1 Code";
-        "Shortcut Dimension 2 Code" := Cust."Global Dimension 2 Code";
-        "VAT Registration No." := Cust."VAT Registration No.";
-        Cust.TESTFIELD("Customer Posting Group");
-        "Customer Posting Group" := Cust."Customer Posting Group";
-        "Gen. Bus. Posting Group" := Cust."Gen. Bus. Posting Group";
-        #33..36
-        "Fin. Charge Terms Code" := Cust."Fin. Charge Terms Code";
-        VALIDATE("Reminder Terms Code");
-
-        CreateDim(DATABASE::Customer,"Customer No.");
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..29
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          "Registration No." := Cust."Registration No.";
-          "Registration No. 2" := Cust."Registration No. 2";
-        end;
-        //NAVE111.0; 001; end
-
-        #30..39
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          UpdateBankInfo;
-        //NAVE111.0; 001; end
-
-        CreateDim(DATABASE::Customer,"Customer No.");
-        */
-        //end;
+        modify("Customer No.")
+        {
+            trigger OnAfterValidate()
+            var
+                Cust: Record Customer;
+            begin
+                Cust.GET("Customer No.");
+                "Registration No." := Cust."Registration No.";
+                "Registration No. 2" := Cust."Registration No. 2";
+                UpdateBankInfo();
+                MODIFY;
+            end;
+        }
         field(46015605; "Registration No."; Text[20])
         {
             Caption = 'Registration No.';
@@ -103,91 +71,39 @@ tableextension 46015547 "Reminder Header Extension" extends "Reminder Header"
             end;
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    ReminderIssue.DeleteHeader(Rec,IssuedReminderHeader);
-
-    ReminderLine.SETRANGE("Reminder No.","No.");
-    ReminderLine.DELETEALL;
-
-    ReminderCommentLine.SETRANGE(Type,ReminderCommentLine.Type::Reminder);
-    ReminderCommentLine.SETRANGE("No.","No.");
-    ReminderCommentLine.DELETEALL;
-    #9..16
-        IssuedReminderHeader.PrintRecords(true,false,false)
-      end;
-    end;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..5
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      DtldReminderLine.SETRANGE("Reminder No.","No.");
-      DtldReminderLine.DELETEALL;
-    end;
-    //NAVE111.0; 001; end
-
-    #6..19
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnInsert". Please convert manually.
-
-    //trigger OnInsert();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    SalesSetup.GET;
-    if "No." = '' then begin
-      SalesSetup.TESTFIELD("Reminder Nos.");
-      SalesSetup.TESTFIELD("Issued Reminder Nos.");
-      NoSeriesMgt.InitSeries(
-        SalesSetup."Reminder Nos.",xRec."No. Series","Posting Date",
-        "No.","No. Series");
-    end;
-    "Posting Description" := STRSUBSTNO(Text000,"No.");
-    if ("No. Series" <> '') and
-       (SalesSetup."Reminder Nos." = SalesSetup."Issued Reminder Nos.")
-    #12..19
-    if GETFILTER("Customer No.") <> '' then
-      if GETRANGEMIN("Customer No.") = GETRANGEMAX("Customer No.") then
-        VALIDATE("Customer No.",GETRANGEMIN("Customer No."));
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..8
-
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      "Multiple Interest Rates" := SalesSetup."Multiple Interest Rates";
-    //NAVE111.0; 001; end
-
-    #9..22
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         CompanyInfo: Record "Company Information";
         DtldReminderLine: Record "Detailed Reminder Line";
+
+    trigger OnBeforeInsert()
+    var
+        SalesSetup: record "Sales & Receivables Setup";
+    begin
+        "Multiple Interest Rates" := SalesSetup."Multiple Interest Rates";
+    end;
+
+    trigger OnBeforeDelete()
+    begin
+        DtldReminderLine.SETRANGE("Reminder No.", "No.");
+        DtldReminderLine.DELETEALL;
+    end;
+
+    procedure UpdateBankInfo();
+    var
+        BankAcc: Record "Bank Account";
+    begin
+        if BankAcc.GET("Bank No.") then begin
+            "Bank Name" := BankAcc.Name;
+            "Bank Account No." := BankAcc."Bank Account No.";
+            "Bank Branch No." := BankAcc."Bank Branch No.";
+            IBAN := BankAcc.IBAN;
+        end else begin
+            CompanyInfo.GET;
+            "Bank Name" := CompanyInfo."Bank Name";
+            "Bank Account No." := CompanyInfo."Bank Account No.";
+            "Bank Branch No." := CompanyInfo."Bank Branch No.";
+            IBAN := CompanyInfo.IBAN;
+        end;
+    end;
 }
 

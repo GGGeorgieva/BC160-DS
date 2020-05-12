@@ -48,11 +48,5 @@ tableextension 46015572 "Purchase Header Archive Ext." extends "Purchase Header 
             TableRelation = "Posting Description" WHERE(Type = CONST("Purchase Document"));
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

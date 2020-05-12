@@ -10,11 +10,5 @@ tableextension 46015527 "Job Posting Buffer Extension" extends "Job Posting Buff
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

@@ -55,12 +55,6 @@ tableextension 46015579 "Responsibility Center Ext." extends "Responsibility Cen
         }
     }
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         CompanyInfo: Record "Company Information";
 }

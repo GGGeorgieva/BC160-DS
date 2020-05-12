@@ -318,67 +318,121 @@ tableextension 46015511 "Sales Cr.Memo Header Ext." extends "Sales Cr.Memo Heade
             Description = 'NAVBG11.0,001';
         }
     }
-
-
-    //Unsupported feature: CodeInsertion on "OnDelete". Please convert manually.
-
-    //trigger (Variable: ExciseTaxDoc)();
-    //Parameters and return type have not been exported.
-    //begin
-    /*
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    PostSalesDelete.IsDocumentDeletionAllowed("Posting Date");
-    TESTFIELD("No. Printed");
-    LOCKTABLE;
-    #4..9
-    ApprovalsMgmt.DeletePostedApprovalEntries(RECORDID);
-    PostedDeferralHeader.DeleteForDoc(DeferralUtilities.GetSalesDeferralDocType,'','',
-      SalesCommentLine."Document Type"::"Posted Credit Memo","No.");
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..12
-
-    //NAVBG11.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-        ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type",ExciseTaxDoc."Document Type"::"Posted Sales Cr.Memo");
-        ExciseTaxDoc.DELETEALL;
-    end;
-    //NAVBG11.0; 001; end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         ExciseTaxDoc: Record "Excise Tax Document";
-
-    var
         Text46012125: Label 'The purpose of this voiding is to show correctly the voided document in VAT ledgers in accordance with Bulgarian law. The voiding does not create any reversed entries. In order to void the entries an invoice must be posted. Do you want to continue?';
         Text46012126: Label 'The document is already voided.';
         Text46012127: Label 'Document %1 was voided.';
         Text46012230: Label 'VAT Date %1 is not within your range of allowed VAT dates.\';
         Text46012231: Label 'Correct the date or change VAT posting period.';
+
+    trigger OnAfterDelete()
+    begin
+        ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", ExciseTaxDoc."Document Type"::"Posted Sales Cr.Memo");
+        ExciseTaxDoc.DELETEALL;
+    end;
+
+    procedure CheckVATDate();
+    var
+        GLSetup: Record "General Ledger Setup";
+        GenJnLCheckLine: Codeunit "Gen. Jnl.-Check Line";
+    begin
+        GLSetup.GET;
+        if GLSetup."Use VAT Date" then begin
+            TESTFIELD("VAT Date");
+            //TODO: After adding the procedures
+            /*
+            if GenJnLCheckLine.VATDateNotAllowed("VAT Date") then
+              ERROR(Text46012230 + Text46012231,"VAT Date");
+            GenJnLCheckLine.VATPeriodCheck("VAT Date");
+            */
+        end;
+    end;
+
+    procedure FindCustLedgEntry(VAR CustLedgEntry: Record "Cust. Ledger Entry"): Boolean;
+    begin
+        CustLedgEntry.RESET;
+        CustLedgEntry.SETCURRENTKEY("Document No.");
+        CustLedgEntry.SETRANGE("Document No.", "No.");
+        CustLedgEntry.SETRANGE("Document Type", CustLedgEntry."Document Type"::"Credit Memo");
+        CustLedgEntry.SETRANGE("Posting Date", "Posting Date");
+        if not CustLedgEntry.FINDFIRST then
+            exit(false);
+        exit(true);
+    end;
+
+    procedure HandlePostponedVAT(VATDate: Date; Post: Boolean);
+    var
+        CustLedgEntry: Record "Cust. Ledger Entry";
+        GenJnlLine: Record "Gen. Journal Line";
+        PostGenJnlLine: Codeunit "Gen. Jnl.-Post Line";
+    begin
+        // Reverse
+        TESTFIELD("Postponed VAT", Post);
+        TESTFIELD("Postponed VAT Realized", not Post);
+        "VAT Date" := VATDate;
+        CheckVATDate;
+
+        if FindCustLedgEntry(CustLedgEntry) then begin
+            GenJnlLine."Document Type" := GenJnlLine."Document Type"::"Credit Memo";
+            GenJnlLine."Document No." := "No.";
+            GenJnlLine."Postponed VAT" := true;
+            GenJnlLine."VAT Date" := VATDate;
+            GenJnlLine.Description := CustLedgEntry.Description;
+            GenJnlLine.Correction := Correction;
+            GenJnlLine."Posting Date" := VATDate;
+            if Post then begin
+                CustLedgEntry.CALCFIELDS("Remaining Amt. (LCY)");
+                GenJnlLine.Amount := CustLedgEntry."Remaining Amt. (LCY)";
+                //TODO: after adding the procedure
+                //PostGenJnlLine.PostCustPostponedVAT(CustLedgEntry,GenJnlLine);
+            end else begin // Reverse
+                           //TODO: After adding the procedure
+                           //PostGenJnlLine.ReverseCustPostponedVAT(GenJnlLine,CustLedgEntry."Transaction No.");
+            end;
+
+            "Postponed VAT" := not Post;
+            "Postponed VAT Realized" := Post;
+        end;
+    end;
+
+    procedure Voiding();
+    var
+        VATEntry: Record "VAT Entry";
+    //TODO: After adding the page
+    //VoidDate : Page "Void Date Input";
+    begin
+        if Void then
+            ERROR(Text46012126);
+        //TODO: after adding the page
+        /*
+        if VoidDate.RUNMODAL = ACTION::OK then begin
+          VoidDate.GetVoidDate("Void Date");
+          if "Void Date" = 0D then
+            exit;
+        end;
+        */
+
+        if not CONFIRM(Text46012125) then
+            exit;
+
+        VATEntry.RESET;
+        VATEntry.SETRANGE(Type, VATEntry.Type::Sale);
+        VATEntry.SETRANGE("Document No.", "No.");
+        VATEntry.SETRANGE("Posting Date", "Posting Date");
+        if VATEntry.FIND('-') then
+            repeat
+                VATEntry.Void := true;
+                VATEntry."Void Date" := "Void Date";
+                VATEntry.MODIFY;
+            until VATEntry.NEXT = 0;
+
+        Void := true;
+        MODIFY;
+
+        MESSAGE(Text46012127, "No.");
+    end;
 }
 

@@ -2,6 +2,8 @@ tableextension 46015566 "Purchase Line Extension" extends "Purchase Line"
 {
     // version NAVW111.00.00.28629,NAVE111.0,NAVBG11.0
 
+    //TODO
+
     fields
     {
 

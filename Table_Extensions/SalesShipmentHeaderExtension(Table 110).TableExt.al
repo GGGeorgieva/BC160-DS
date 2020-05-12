@@ -157,7 +157,7 @@ tableextension 46015508 "Sales Shipment Header Ext." extends "Sales Shipment Hea
             Description = 'NAVE18.00,001';
             //This property is currently not supported
             //TestTableRelation = false;
-            //TO DO
+            //TODO
             //ValidateTableRelation = false;
         }
         field(46015637; "Identity Card No."; Code[20])
@@ -197,62 +197,20 @@ tableextension 46015508 "Sales Shipment Header Ext." extends "Sales Shipment Hea
             Description = 'NAVBG8.00,001';
         }
     }
-
-
-    //Unsupported feature: CodeInsertion on "OnDelete". Please convert manually.
-
-    //trigger (Variable: ExciseTaxDoc)();
-    //Parameters and return type have not been exported.
-    //begin
-    /*
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    TESTFIELD("No. Printed");
-    LOCKTABLE;
-    PostSalesDelete.DeleteSalesShptLines(Rec);
-    #4..9
-
-    if CertificateOfSupply.GET(CertificateOfSupply."Document Type"::"Sales Shipment","No.") then
-      CertificateOfSupply.DELETE(true);
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    //NAVE18.00; 001; single
-    if LocalizationUsage.UseEastLocalization then
-      PostSalesDelete.CheckIfSalesDocDeleteAllowed("Posting Date");
-
-    #1..12
-
-    //NAVBG11.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type",ExciseTaxDoc."Document Type"::"Posted Sales Shipment");
-      ExciseTaxDoc.DELETEALL;
-    end;
-    //NAVBG11.0; 001; end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         ExciseTaxDoc: Record "Excise Tax Document";
+
+    trigger OnBeforeDelete()
+    var
+        PostSalesDelete: Codeunit "PostSales-Delete";
+    begin
+        //TODO: After adding the procedure
+        //PostSalesDelete.CheckIfSalesDocDeleteAllowed("Posting Date");
+        ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", ExciseTaxDoc."Document Type"::"Posted Sales Shipment");
+        ExciseTaxDoc.DELETEALL;
+    end;
 
 }
 

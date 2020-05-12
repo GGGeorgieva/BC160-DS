@@ -1,7 +1,7 @@
 tableextension 46015509 "Sales Invoice Header Extension" extends "Sales Invoice Header"
 {
     // version NAVW111.00.00.20783,NAVE111.0,NAVBG11.0
-
+    //TODO
     fields
     {
         field(46015505; "Identification No."; Text[13])

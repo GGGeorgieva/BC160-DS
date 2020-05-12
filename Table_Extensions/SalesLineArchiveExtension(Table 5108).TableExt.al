@@ -10,11 +10,5 @@ tableextension 46015581 "Sales Line Archive Extension" extends "Sales Line Archi
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

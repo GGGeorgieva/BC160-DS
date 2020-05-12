@@ -155,48 +155,50 @@ tableextension 46015515 "Purch. Inv. Header Extension" extends "Purch. Inv. Head
             Description = 'NAVBG11.0,001';
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    PostPurchDelete.IsDocumentDeletionAllowed("Posting Date");
-    LOCKTABLE;
-    PostPurchDelete.DeletePurchInvLines(Rec);
-    #4..8
-    ApprovalsMgmt.DeletePostedApprovalEntries(RECORDID);
-    PostedDeferralHeader.DeleteForDoc(DeferralUtilities.GetPurchDeferralDocType,'','',
-      PurchCommentLine."Document Type"::"Posted Invoice","No.");
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      PostPurchDelete.CheckIfPurchDocDeleteAllowed("Posting Date")
-    else
-    //NAVE111.0; 001; end
-
-    #1..11
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         Text46012125: Label 'The document is already voided.';
         Text46012126: Label 'Document %1 was voided.';
+
+    trigger OnBeforeDelete()
+    var
+        PostPurchDelete: codeunit "PostPurch-Delete";
+    begin
+        //TODO: after adding the procedure
+        //PostPurchDelete.CheckIfPurchDocDeleteAllowed("Posting Date")
+    end;
+
+    procedure Voiding();
+    var
+        VATEntry: Record "VAT Entry";
+    //TODO: After adding the page
+    //VoidDate : Page "Void Date Input";
+    begin
+        if Void then
+            ERROR(Text46012125);
+        //TODO: After adding the page
+        /*
+        if VoidDate.RUNMODAL = ACTION::OK then begin
+          VoidDate.GetVoidDate("Void Date");
+          if "Void Date" = 0D then
+            exit;
+        end;
+        */
+
+        VATEntry.RESET;
+        VATEntry.SETRANGE(Type, VATEntry.Type::Purchase);
+        VATEntry.SETRANGE("Document No.", "No.");
+        VATEntry.SETRANGE("Posting Date", "Posting Date");
+        if VATEntry.FIND('-') then
+            repeat
+                VATEntry.Void := true;
+                VATEntry."Void Date" := "Void Date";
+                VATEntry.MODIFY;
+            until VATEntry.NEXT = 0;
+
+        Void := true;
+        MODIFY;
+
+        MESSAGE(Text46012126, "No.");
+    end;
 }
 

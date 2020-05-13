@@ -1,483 +1,195 @@
 tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line"
 {
     // version NAVW111.00.00.27667,NAVE111.0,NAVBG11.0,DS11.00
+    //TODO:
+    //VAT Prod. Posting Group - OnValidate
 
     fields
     {
-        //TODO
-
-        //Unsupported feature: CodeInsertion on ""Account Type"(Field 3).OnValidate". Please convert manually.
-
-        //trigger (Variable: GLAcc)();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Account Type"(Field 3).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if ("Account Type" in ["Account Type"::Customer,"Account Type"::Vendor,"Account Type"::"Fixed Asset",
-                               "Account Type"::"IC Partner","Account Type"::Employee]) and
-           ("Bal. Account Type" in ["Bal. Account Type"::Customer,"Bal. Account Type"::Vendor,"Bal. Account Type"::"Fixed Asset",
-        #4..38
-          "VAT Registration No." := '';
-        end;
-
-        if "Journal Template Name" <> '' then
-          if "Account Type" = "Account Type"::"IC Partner" then begin
-            GetTemplate;
-        #45..48
-          VALIDATE("Credit Card No.",'');
-
-        VALIDATE("Deferral Code",'');
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..41
-        //NAVE111.0; 001; begin
-        if ("Account Type" = "Account Type"::"IC Partner") and
-           ("Bal. Account Type" = "Bal. Account Type"::"G/L Account") and
-           GLAcc.GET("Bal. Account No.") and
-           LocalizationUsage.UseEastLocalization
-        then
-          "IC Partner G/L Acc. No." := GLAcc."Default IC Partner G/L Acc. No"
-        else
-          "IC Partner G/L Acc. No." := '';
-        //NAVE111.0; 001; end
-
-        #42..51
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Posting Date"(Field 5).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        VALIDATE("Document Date","Posting Date");
-        VALIDATE("Currency Code");
-
-        if ("Posting Date" <> xRec."Posting Date") and (Amount <> 0) then
-        #5..12
-
-        if "Deferral Code" <> '' then
-          VALIDATE("Deferral Code");
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        VALIDATE("Document Date","Posting Date");
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          VALIDATE("VAT Date","Posting Date");
-        //NAVE111.0; 001; end
-
-        #2..15
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""VAT %"(Field 10).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        GetCurrency;
-        case "VAT Calculation Type" of
-          "VAT Calculation Type"::"Normal VAT",
-        #4..42
-                "VAT Amount","Currency Factor"));
-        "VAT Base Amount (LCY)" := "Amount (LCY)" - "VAT Amount (LCY)";
-
-        UpdateSalesPurchLCY;
-
-        if "Deferral Code" <> '' then
-          VALIDATE("Deferral Code");
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..45
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          VALIDATE("VAT % (Non Deductible)",GetVATDeduction);
-        //NAVE111.0; 001; end
-
-        #46..49
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Currency Code"(Field 12).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if "Bal. Account Type" = "Bal. Account Type"::"Bank Account" then begin
-          if BankAcc.GET("Bal. Account No.") and (BankAcc."Currency Code" <> '')then
-            BankAcc.TESTFIELD("Currency Code","Currency Code");
-        #4..31
-        if not CustVendAccountNosModified then
-          if ("Currency Code" <> xRec."Currency Code") and (Amount <> 0) then
-            PaymentToleranceMgt.PmtTolGenJnl(Rec);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        //NAVE111.0; 001; begin
-        if "VAT Protocol" and LocalizationUsage.UseEastLocalization then
-          TESTFIELD("Currency Code",'');
-        //NAVE111.0; 001; end
-
-        #1..34
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on "Amount(Field 13).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        ValidateAmount(true);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        ValidateAmount(true);
-        //NAVE111.0; 001; begin
-        if "VAT Protocol" and LocalizationUsage.UseEastLocalization then
-          if VATPostingSetup.GET("VAT Bus. Posting Group","VAT Prod. Posting Group") then
-            if VATPostingSetup."VAT %" <> 0 then
-              "VAT Protocol Base Amount (LCY)" :=
-                ROUND("Amount (LCY)" / VATPostingSetup."VAT %" * 100,GLSetup."Amount Rounding Precision");
-        //NAVE111.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""Posting Group"(Field 23)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //TO DO
-        /*
-        var
-            Cust : Record Customer;
-            Vend : Record Vendor;
-        */
-        //begin
-        /*
-
-        //NAVE111.0; 001; begin
-        if (CurrFieldNo = FIELDNO("Posting Group")) and LocalizationUsage.UseEastLocalization then begin
-          case "Account Type" of
-            "Account Type"::Customer:
-              begin
-                SalesSetup.GET;
-                if SalesSetup."Allow Alter Posting Groups" then begin
-                  Cust.GET("Account No.");
-                  if not SubstCustPostingGrp.GET(xRec."Posting Group","Posting Group") and
-                    ("Posting Group" <> Cust."Customer Posting Group")
-                  then
-                    ERROR(Text46012225,xRec."Posting Group","Posting Group",SubstCustPostingGrp.TABLECAPTION);
-                end else
-                  if xRec."Posting Group" <> "Posting Group" then
-                    ERROR(Text46012226,FIELDCAPTION("Posting Group"),SalesSetup.FIELDCAPTION("Allow Alter Posting Groups"));
-              end;
-            "Account Type"::Vendor:
-              begin
-                PurchSetup.GET;
-                if PurchSetup."Allow Alter Posting Groups" then begin
-                  Vend.GET("Account No.");
-                  if not SubstVendPostingGrp.GET(xRec."Posting Group","Posting Group") and
-                    ("Posting Group" <> Vend."Vendor Posting Group")
-                  then
-                    ERROR(Text46012225,xRec."Posting Group","Posting Group",SubstVendPostingGrp.TABLECAPTION);
-                end else
-                  if xRec."Posting Group" <> "Posting Group" then
-                    ERROR(Text46012226,FIELDCAPTION("Posting Group"),PurchSetup.FIELDCAPTION("Allow Alter Posting Groups"));
-              end;
-            else
-              ERROR(Text010,FIELDCAPTION("Account Type"),"Account Type"::Customer,"Account Type"::Vendor);
-          end;
-        end;
-        //NAVE111.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""VAT Amount"(Field 44).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        GenJnlBatch.GET("Journal Template Name","Journal Batch Name");
-        GenJnlBatch.TESTFIELD("Allow VAT Difference",true);
-        if not ("VAT Calculation Type" in
-        #4..39
-                "VAT Amount","Currency Factor"));
-        "VAT Base Amount (LCY)" := "Amount (LCY)" - "VAT Amount (LCY)";
-
-        UpdateSalesPurchLCY;
-
-        if JobTaskIsSet then begin
-        #46..48
-
-        if "Deferral Code" <> '' then
-          VALIDATE("Deferral Code");
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..42
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          VALIDATE("VAT % (Non Deductible)",GetVATDeduction);
-        //NAVE111.0; 001; end
-
-        #43..51
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Gen. Posting Type"(Field 57).OnValidate". Please convert manually.
-
-        //trigger  Posting Type"(Field 57)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if "Account Type" in ["Account Type"::Customer,"Account Type"::Vendor,"Account Type"::"Bank Account"] then
-          TESTFIELD("Gen. Posting Type","Gen. Posting Type"::" ");
-        if ("Gen. Posting Type" = "Gen. Posting Type"::Settlement) and (CurrFieldNo <> 0) then
-          ERROR(Text006,"Gen. Posting Type");
-        CheckVATInAlloc;
-        if "Gen. Posting Type" > 0 then
-          VALIDATE("VAT Prod. Posting Group");
-        if "Gen. Posting Type" <> "Gen. Posting Type"::Purchase then
-          VALIDATE("Use Tax",false)
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..5
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          case "Gen. Posting Type" of
-            "Gen. Posting Type"::Sale:
-              begin
-                "VAT Type" := "VAT Type"::Sale;
+        modify("Account Type")
+        {
+            trigger OnAfterValidate()
+            begin
+                if ("Account Type" = "Account Type"::"IC Partner") and
+                    ("Bal. Account Type" = "Bal. Account Type"::"G/L Account") and
+                    GLAcc.GET("Bal. Account No.")
+                then
+                    "IC Partner G/L Acc. No." := GLAcc."Default IC Partner G/L Acc. No"
+                else
+                    "IC Partner G/L Acc. No." := '';
+                MODIFY;
+            end;
+        }
+        modify("Posting Date")
+        {
+            trigger OnBeforeValidate()
+            begin
+                VALIDATE("VAT Date", "Posting Date");
+            end;
+        }
+        modify("VAT %")
+        {
+            trigger OnAfterValidate()
+            begin
+                VALIDATE("VAT % (Non Deductible)", GetVATDeduction);
+                MODIFY;
+            end;
+        }
+        modify("Currency Code")
+        {
+            trigger OnBeforeValidate()
+            begin
+                if "VAT Protocol" then
+                    TESTFIELD("Currency Code", '');
+            end;
+        }
+        modify(Amount)
+        {
+            trigger OnAfterValidate()
+            var
+                VATPostingSetup: Record "VAT Posting Setup";
+                GLSetup: Record "General Ledger Setup";
+            begin
                 if "VAT Protocol" then begin
-                  SalesSetup.GET;
-                  VALIDATE("VAT Bus. Posting Group",SalesSetup."EU VAT Bus. Posting Group");
-                  if ("Bal. Gen. Posting Type" = "Bal. Gen. Posting Type"::Purchase) then
-                    "VAT Type" := "VAT Type"::Purchase;
+                    GLSetup.GET;
+                    if VATPostingSetup.GET("VAT Bus. Posting Group", "VAT Prod. Posting Group") then
+                        if VATPostingSetup."VAT %" <> 0 then
+                            "VAT Protocol Base Amount (LCY)" :=
+                              ROUND("Amount (LCY)" / VATPostingSetup."VAT %" * 100, GLSetup."Amount Rounding Precision");
+                    MODIFY;
                 end;
-              end;
-            "Gen. Posting Type"::Purchase:
-              "VAT Type" := "VAT Type"::Purchase;
-          end;
-        //NAVE111.0; 001; end
-
-        #6..9
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""EU 3-Party Trade"(Field 61)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; begin
-        if not "EU 3-Party Trade" and LocalizationUsage.UseEastLocalization then
-          "EU 3-Party Intermediate Role" := false;
-        //NAVE111.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Bal. Gen. Posting Type"(Field 64).OnValidate". Please convert manually.
-
-        //trigger  Gen();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if "Bal. Account Type" in ["Bal. Account Type"::Customer,"Bal. Account Type"::Vendor,"Bal. Account Type"::"Bank Account"] then
-          TESTFIELD("Bal. Gen. Posting Type","Bal. Gen. Posting Type"::" ");
-        if ("Bal. Gen. Posting Type" = "Gen. Posting Type"::Settlement) and (CurrFieldNo <> 0) then
-          ERROR(Text006,"Bal. Gen. Posting Type");
-        if "Bal. Gen. Posting Type" > 0 then
-          VALIDATE("Bal. VAT Prod. Posting Group");
-
-        #8..12
-        end;
-        if "Bal. Gen. Posting Type" <> "Bal. Gen. Posting Type"::Purchase then
-          VALIDATE("Bal. Use Tax",false);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..4
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          case "Bal. Gen. Posting Type" of
-            "Bal. Gen. Posting Type"::Purchase:
-              begin
-                "VAT Type" := "VAT Type"::Purchase;
-                if "VAT Protocol" then begin
-                  PurchSetup.GET;
-                  VALIDATE("Bal. VAT Bus. Posting Group",PurchSetup."EU VAT Bus. Posting Group");
+            end;
+        }
+        modify("Posting Group")
+        {
+            trigger OnBeforeValidate()
+            var
+                Cust: Record Customer;
+                Vend: Record Vendor;
+            begin
+                if (CurrFieldNo = FIELDNO("Posting Group")) then begin
+                    case "Account Type" of
+                        "Account Type"::Customer:
+                            begin
+                                SalesSetup.GET;
+                                if SalesSetup."Allow Alter Posting Groups" then begin
+                                    Cust.GET("Account No.");
+                                    if not SubstCustPostingGrp.GET(xRec."Posting Group", "Posting Group") and
+                                      ("Posting Group" <> Cust."Customer Posting Group")
+                                    then
+                                        ERROR(Text46012225, xRec."Posting Group", "Posting Group", SubstCustPostingGrp.TABLECAPTION);
+                                end else
+                                    if xRec."Posting Group" <> "Posting Group" then
+                                        ERROR(Text46012226, FIELDCAPTION("Posting Group"), SalesSetup.FIELDCAPTION("Allow Alter Posting Groups"));
+                            end;
+                        "Account Type"::Vendor:
+                            begin
+                                PurchSetup.GET;
+                                if PurchSetup."Allow Alter Posting Groups" then begin
+                                    Vend.GET("Account No.");
+                                    if not SubstVendPostingGrp.GET(xRec."Posting Group", "Posting Group") and
+                                      ("Posting Group" <> Vend."Vendor Posting Group")
+                                    then
+                                        ERROR(Text46012225, xRec."Posting Group", "Posting Group", SubstVendPostingGrp.TABLECAPTION);
+                                end else
+                                    if xRec."Posting Group" <> "Posting Group" then
+                                        ERROR(Text46012226, FIELDCAPTION("Posting Group"), PurchSetup.FIELDCAPTION("Allow Alter Posting Groups"));
+                            end;
+                        else
+                            ERROR(Text010, FIELDCAPTION("Account Type"), "Account Type"::Customer, "Account Type"::Vendor);
+                    end;
                 end;
-              end;
-            "Bal. Gen. Posting Type"::Sale:
-              "VAT Type" := "VAT Type"::Sale;
-          end;
-        end;
-        //NAVE111.0; 001; end
+            end;
+        }
+        modify("VAT Amount")
+        {
+            trigger OnAfterValidate()
+            begin
+                VALIDATE("VAT % (Non Deductible)", GetVATDeduction);
+                MODIFY;
+            end;
+        }
+        modify("Gen. Posting Type")
+        {
+            trigger OnAfterValidate()
+            begin
+                case "Gen. Posting Type" of
+                    "Gen. Posting Type"::Sale:
+                        begin
+                            "VAT Type" := "VAT Type"::Sale;
+                            if "VAT Protocol" then begin
+                                SalesSetup.GET;
+                                VALIDATE("VAT Bus. Posting Group", SalesSetup."EU VAT Bus. Posting Group");
+                                if ("Bal. Gen. Posting Type" = "Bal. Gen. Posting Type"::Purchase) then
+                                    "VAT Type" := "VAT Type"::Purchase;
+                            end;
+                        end;
+                    "Gen. Posting Type"::Purchase:
+                        "VAT Type" := "VAT Type"::Purchase;
+                end;
+                MODIFY;
+            end;
+        }
+        modify("EU 3-Party Trade")
+        {
+            trigger OnBeforeValidate()
+            begin
+                if not "EU 3-Party Trade" then
+                    "EU 3-Party Intermediate Role" := false;
+            end;
+        }
+        modify("Bal. Gen. Posting Type")
+        {
+            trigger OnAfterValidate()
+            begin
+                case "Bal. Gen. Posting Type" of
+                    "Bal. Gen. Posting Type"::Purchase:
+                        begin
+                            "VAT Type" := "VAT Type"::Purchase;
+                            if "VAT Protocol" then begin
+                                PurchSetup.GET;
+                                VALIDATE("Bal. VAT Bus. Posting Group", PurchSetup."EU VAT Bus. Posting Group");
+                            end;
+                        end;
+                    "Bal. Gen. Posting Type"::Sale:
+                        "VAT Type" := "VAT Type"::Sale;
+                end;
+                VATExportSetup.GET;
+                case "Bal. Gen. Posting Type" of
+                    "Bal. Gen. Posting Type"::Purchase:
+                        "VAT Subject" := VATExportSetup."Purchase VAT Subject";
+                    "Bal. Gen. Posting Type"::Sale:
+                        "VAT Subject" := VATExportSetup."Sales VAT Subject";
+                end;
+                MODIFY;
+            end;
+        }
+        modify("Creditor No.")
+        {
+            trigger OnBeforeValidate()
+            begin
+                if ("Creditor No." <> '') and ("Recipient Bank Account" <> '') then
+                    FIELDERROR("Recipient Bank Account",
+                      STRSUBSTNO(FieldIsNotEmptyErr, FIELDCAPTION("Creditor No."), FIELDCAPTION("Recipient Bank Account")));
+            end;
+        }
+        modify("Recipient Bank Account")
+        {
+            trigger OnBeforeValidate()
+            begin
+                if "Recipient Bank Account" = '' then
+                    exit;
+                if ("Document Type" = "Document Type"::Invoice) and
+                    (("Account Type" in ["Account Type"::Customer, "Account Type"::Vendor]) or
+                    ("Bal. Account Type" in ["Bal. Account Type"::Customer, "Bal. Account Type"::Vendor]))
+                then
+                    "Recipient Bank Account" := '';
+                if ("Recipient Bank Account" <> '') and ("Creditor No." <> '') then
+                    FIELDERROR("Creditor No.",
+                      STRSUBSTNO(FieldIsNotEmptyErr, FIELDCAPTION("Recipient Bank Account"), FIELDCAPTION("Creditor No.")));
+            end;
+        }
 
-        #5..15
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          VATExportSetup.GET;
-          case "Bal. Gen. Posting Type" of
-            "Bal. Gen. Posting Type"::Purchase:
-              "VAT Subject" := VATExportSetup."Purchase VAT Subject";
-            "Bal. Gen. Posting Type"::Sale:
-              "VAT Subject" := VATExportSetup."Sales VAT Subject";
-          end;
-        end;
-        //NAVE111.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""VAT Prod. Posting Group"(Field 91).OnValidate". Please convert manually.
-
-        //trigger  Posting Group"(Field 91)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if "Account Type" in ["Account Type"::Customer,"Account Type"::Vendor,"Account Type"::"Bank Account"] then
-          TESTFIELD("VAT Prod. Posting Group",'');
-
-        #4..14
-            "VAT Calculation Type"::"Full VAT":
-              case "Gen. Posting Type" of
-                "Gen. Posting Type"::Sale:
-                  TESTFIELD("Account No.",VATPostingSetup.GetSalesAccount(false));
-                "Gen. Posting Type"::Purchase:
-                  TESTFIELD("Account No.",VATPostingSetup.GetPurchAccount(false));
-              end;
-          end;
-        end;
-        #24..26
-          CreateTempJobJnlLine;
-          UpdatePricesFromJobJnlLine;
-        end
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..17
-                  //NAVE111.0; 001; begin
-                  if not "VAT Protocol" and LocalizationUsage.UseEastLocalization then
-                    TESTFIELD("Account No.",VATPostingSetup.GetSalesAccount(false))
-                  else
-                    if not LocalizationUsage.UseEastLocalization then
-                    //NAVE111.0; 001; end
-                      TESTFIELD("Account No.",VATPostingSetup.GetSalesAccount(false));
-                "Gen. Posting Type"::Purchase:
-                    //NAVE111.0; 001; begin
-                    if not "VAT Protocol" and LocalizationUsage.UseEastLocalization then
-                      TESTFIELD("Account No.",VATPostingSetup.GetPurchAccount(false))
-                    else
-                      if not LocalizationUsage.UseEastLocalization then
-                    //NAVE111.0; 001; end
-                        TESTFIELD("Account No.",VATPostingSetup.GetPurchAccount(false));
-        #21..29
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""Creditor No."(Field 170)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; begin
-        if ("Creditor No." <> '') and ("Recipient Bank Account" <> '') then
-          FIELDERROR("Recipient Bank Account",
-            STRSUBSTNO(FieldIsNotEmptyErr,FIELDCAPTION("Creditor No."),FIELDCAPTION("Recipient Bank Account")));
-        //NAVE111.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Recipient Bank Account"(Field 288).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if "Recipient Bank Account" = '' then
-          exit;
-        if ("Document Type" = "Document Type"::Invoice) and
-           (("Account Type" in ["Account Type"::Customer,"Account Type"::Vendor]) or
-            ("Bal. Account Type" in ["Bal. Account Type"::Customer,"Bal. Account Type"::Vendor]))
-        then
-          "Recipient Bank Account" := '';
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..7
-        //NAVE111.0; 001; begin
-        if ("Recipient Bank Account" <> '') and ("Creditor No." <> '') and LocalizationUsage.UseEastLocalization then
-          FIELDERROR("Creditor No.",
-            STRSUBSTNO(FieldIsNotEmptyErr,FIELDCAPTION("Recipient Bank Account"),FIELDCAPTION("Creditor No.")));
-        //NAVE111.0; 001; end
-        */
-        //end;
         field(46015506; "Debit Memo"; Boolean)
         {
             Caption = 'Debit Memo';
@@ -531,19 +243,20 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
             Description = 'NAVBG11.0,001';
 
             trigger OnValidate();
+            var
+                GLSetup: Record "General Ledger Setup";
+                GenJnlBatch: Record "Gen. Journal Batch";
+
             begin
-                //TO DO
-                /*
                 if "VAT Protocol" then begin
-                  GLSetup.GET;
-                  "Posting No. Series" := GLSetup."Posted VAT Protocol Nos.";
-                  VALIDATE("Currency Code",'');
+                    GLSetup.GET;
+                    "Posting No. Series" := GLSetup."Posted VAT Protocol Nos.";
+                    VALIDATE("Currency Code", '');
                 end else begin
-                  GenJnlBatch.GET("Journal Template Name","Journal Batch Name");
-                  "Posting No. Series" := GenJnlBatch."Posting No. Series";
-                  "VAT Protocol Base Amount (LCY)" := 0;
+                    GenJnlBatch.GET("Journal Template Name", "Journal Batch Name");
+                    "Posting No. Series" := GenJnlBatch."Posting No. Series";
+                    "VAT Protocol Base Amount (LCY)" := 0;
                 end;
-                */
             end;
         }
         field(46015527; "VAT Protocol Base Amount (LCY)"; Decimal)
@@ -554,13 +267,12 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
             trigger OnValidate();
             var
                 VATPostingSetup: Record "VAT Posting Setup";
+                GLSetup: Record "General Ledger Setup";
             begin
-                //TO DO
-                /*
                 TESTFIELD("VAT Protocol");
-                VATPostingSetup.GET("VAT Bus. Posting Group","VAT Prod. Posting Group");
-                VALIDATE(Amount,ROUND("VAT Protocol Base Amount (LCY)" * VATPostingSetup."VAT %" / 100,GLSetup."Amount Rounding Precision"));
-              */
+                GLSetup.GET;
+                VATPostingSetup.GET("VAT Bus. Posting Group", "VAT Prod. Posting Group");
+                VALIDATE(Amount, ROUND("VAT Protocol Base Amount (LCY)" * VATPostingSetup."VAT %" / 100, GLSetup."Amount Rounding Precision"));
             end;
         }
         field(46015561; "Excise Amount"; Decimal)
@@ -576,17 +288,14 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
 
             trigger OnValidate();
             begin
-                //TO DO
-                /*
                 if "Currency Code" = '' then
-                  "Excise Amount" := "Excise Amount (LCY)"
+                    "Excise Amount" := "Excise Amount (LCY)"
                 else
-                  "Excise Amount" :=
-                    ROUND(
-                      CurrExchRate.ExchangeAmtLCYToFCY(
-                      "Posting Date","Currency Code",
-                      "Excise Amount (LCY)","Currency Factor"));
-                */
+                    "Excise Amount" :=
+                      ROUND(
+                        CurrExchRate.ExchangeAmtLCYToFCY(
+                        "Posting Date", "Currency Code",
+                        "Excise Amount (LCY)", "Currency Factor"));
             end;
         }
         field(46015563; "Source Currency Excise Amount"; Decimal)
@@ -607,17 +316,14 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
 
             trigger OnValidate();
             begin
-                //TO DO
-                /*
-                  if "Currency Code" = '' then
+                if "Currency Code" = '' then
                     "Product Tax Amount" := "Product Tax Amount (LCY)"
-                  else
+                else
                     "Product Tax Amount" :=
                       ROUND(
                         CurrExchRate.ExchangeAmtLCYToFCY(
-                        "Posting Date","Currency Code",
-                        "Product Tax Amount (LCY)","Currency Factor"));
-                */
+                        "Posting Date", "Currency Code",
+                        "Product Tax Amount (LCY)", "Currency Factor"));
             end;
         }
         field(46015566; "Src. Curr. Product Tax Amount"; Decimal)
@@ -641,14 +347,13 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
             Description = 'NAVE111.0,001';
 
             trigger OnValidate();
+            var
+                GLSetup: Record "General Ledger Setup";
             begin
-                //TO DO
-                /*
                 GLSetup.GET;
                 if not GLSetup."Use VAT Date" then
-                  TESTFIELD("VAT Date","Posting Date");
-                VALIDATE("VAT % (Non Deductible)",GetVATDeduction);
-                */
+                    TESTFIELD("VAT Date", "Posting Date");
+                VALIDATE("VAT % (Non Deductible)", GetVATDeduction);
             end;
         }
         field(46015611; "Postponed VAT"; Boolean)
@@ -740,14 +445,14 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
             MinValue = 0;
 
             trigger OnValidate();
+            var
+                Currency: Record Currency;
             begin
-                // TO DO
-                /*
-                  VALIDATE("VAT Base (Non Deductible)",
-                    ROUND("VAT Base Amount" * "VAT % (Non Deductible)" / 100,Currency."Amount Rounding Precision"));
-                  VALIDATE("VAT Amount (Non Deductible)",
-                    ROUND("VAT Base (Non Deductible)" * "VAT %" / 100,Currency."Amount Rounding Precision"));
-                */
+                Currency.GET("Currency Code");
+                VALIDATE("VAT Base (Non Deductible)",
+                  ROUND("VAT Base Amount" * "VAT % (Non Deductible)" / 100, Currency."Amount Rounding Precision"));
+                VALIDATE("VAT Amount (Non Deductible)",
+                  ROUND("VAT Base (Non Deductible)" * "VAT %" / 100, Currency."Amount Rounding Precision"));
             end;
         }
         field(46015636; "VAT Base (Non Deductible)"; Decimal)
@@ -759,17 +464,14 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
 
             trigger OnValidate();
             begin
-                //TO DO
-                /*
-                  if "Currency Code" = '' then
+                if "Currency Code" = '' then
                     "VAT Base LCY (Non Deduct.)" := "VAT Base (Non Deductible)"
-                  else
+                else
                     "VAT Base LCY (Non Deduct.)" :=
                       ROUND(
                         CurrExchRate.ExchangeAmtFCYToLCY(
-                          "Posting Date","Currency Code",
-                          "VAT Base (Non Deductible)","Currency Factor"));
-                */
+                          "Posting Date", "Currency Code",
+                          "VAT Base (Non Deductible)", "Currency Factor"));
             end;
         }
         field(46015637; "VAT Amount (Non Deductible)"; Decimal)
@@ -781,17 +483,16 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
 
             trigger OnValidate();
             begin
-                //TO DO
-                /*
-                  if "Currency Code" = '' then
+
+                if "Currency Code" = '' then
                     "VAT Amount LCY (Non Deduct.)" := "VAT Amount (Non Deductible)"
-                  else
+                else
                     "VAT Amount LCY (Non Deduct.)" :=
                       ROUND(
                         CurrExchRate.ExchangeAmtFCYToLCY(
-                          "Posting Date","Currency Code",
-                          "VAT Amount (Non Deductible)","Currency Factor"));
-                */
+                          "Posting Date", "Currency Code",
+                          "VAT Amount (Non Deductible)", "Currency Factor"));
+
             end;
         }
         field(46015638; "VAT Base LCY (Non Deduct.)"; Decimal)
@@ -860,21 +561,15 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
     }
     keys
     {
-        //TO DO
+        //TODO
         /*
           key(Key1;"Document No.","Posting Date","Currency Code")
           {
           }
         */
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
+        CurrExchRate: Record "Currency Exchange Rate";
         GLAcc: Record "G/L Account";
         OK: Boolean;
         SalesSetup: Record "Sales & Receivables Setup";
@@ -882,11 +577,33 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
         PurchSetup: Record "Purchases & Payables Setup";
         SubstVendPostingGrp: Record "Subst. Vendor Posting Group";
         VATExportSetup: Record "VAT Export Setup";
+        Text010: Label '%1 must be %2 or %3.';
         FieldIsNotEmptyErr: Label '%1 cannot be used while %2 has a value.';
         Text46012225: Label 'You cannot change the %1 to %2 because %3 has not been filled in.';
         Text46012226: Label 'You cannot change %1 until %2 will be checked in setup.';
         Text46012126: Label '%1 will be replaced with %2 from %3';
         Text003: TextConst Comment = '%1=Caption of Currency Code field, %2=Caption of table Gen Journal, %3=FromCurrencyCode, %4=ToCurrencyCode', ENU = 'The %1 in the %2 will be changed from %3 to %4.\\Do you want to continue?';
         Text005: Label 'The update has been interrupted to respect the warning.';
+
+    procedure GetVATDeduction(): Decimal;
+    var
+        NonDeductVATSetup: Record "Non Deductible VAT Setup";
+        VATPostingSetup2: Record "VAT Posting Setup";
+    begin
+        if VATPostingSetup2.GET("VAT Bus. Posting Group", "VAT Prod. Posting Group") and
+           (VATPostingSetup2."VAT Calculation Type" = VATPostingSetup2."VAT Calculation Type"::"Normal VAT") and
+           VATPostingSetup2."Allow Non Deductible VAT"
+        then begin
+            NonDeductVATSetup.RESET;
+            NonDeductVATSetup.SETRANGE("VAT Bus. Posting Group", VATPostingSetup2."VAT Bus. Posting Group");
+            NonDeductVATSetup.SETRANGE("VAT Prod. Posting Group", VATPostingSetup2."VAT Prod. Posting Group");
+            NonDeductVATSetup.SETRANGE("From Date", 0D, "VAT Date");
+            if NonDeductVATSetup.FINDLAST then begin
+                NonDeductVATSetup.TESTFIELD("Non Deductible VAT %");
+                exit(NonDeductVATSetup."Non Deductible VAT %");
+            end
+        end;
+        exit(0);
+    end;
 }
 

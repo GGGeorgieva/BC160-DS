@@ -1,10 +1,6 @@
 tableextension 46015524 "Customer Extension" extends Customer
 {
     // version NAVW111.00.00.27667,NAVBG11.0,DS11.00
-
-    //TODO
-    //Procedure IsContactUpdateNeeded()
-
     fields
     {
         field(46015505; "Identification No."; Text[13])
@@ -143,12 +139,15 @@ tableextension 46015524 "Customer Extension" extends Customer
         {
         }
     }
+    var
+        DefDim: Codeunit "BG Utils";
+        DimValue: Record Customer;
+        Text46012225: Label 'Customer with the same %1 already exists.';
 
     procedure GetLinkedVendor(): Code[20];
-    VAR
+    var
         ContBusRel: Record "Contact Business Relation";
-    BEGIN
-        //NAVE111.0; 001; entire function
+    begin
         ContBusRel.SETCURRENTKEY("Link to Table", "No.");
         ContBusRel.SETRANGE("Link to Table", ContBusRel."Link to Table"::Customer);
         ContBusRel.SETRANGE("No.", "No.");
@@ -159,75 +158,6 @@ tableextension 46015524 "Customer Extension" extends Customer
             if ContBusRel.FINDFIRST then
                 exit(ContBusRel."No.");
         end;
-    END;
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    ApprovalsMgmt.OnCancelCustomerApprovalRequest(Rec);
-
-    ServiceItem.SETRANGE("Customer No.","No.");
-    #4..122
-    MyCustomer.DELETEALL;
-    VATRegistrationLogMgt.DeleteCustomerLog(Rec);
-
-    DimMgt.DeleteDefaultDim(DATABASE::Customer,"No.");
-
-    CalendarManagement.DeleteCustomizedBaseCalendarData(CustomizedCalendarChange."Source Type"::Customer,"No.");
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..125
-
-    #126..128
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnModify". Please convert manually.
-
-    //trigger OnModify();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    SetLastModifiedDateTime;
-    if IsContactUpdateNeeded then begin
-      MODIFY;
-      UpdateContFromCust.OnModify(Rec);
-      if not FIND then begin
-        RESET;
-        if FIND then;
-      end;
     end;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..8
-      end;
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
-    var
-        DefDim: Codeunit "BG Utils";
-        DimValue: Record Customer;
-        GLSetup: Record "General Ledger Setup";
-        DimensionValue: Record "Dimension Value";
-        DefaultDimension: Record "Default Dimension";
-        DimensionValue2: Record "Dimension Value";
-        Text46012225: Label 'Customer with the same %1 already exists.';
 }
 

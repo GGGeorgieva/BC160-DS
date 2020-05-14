@@ -1,12 +1,5 @@
 tableextension 46015561 "Sales Header Extension" extends "Sales Header"
 {
-    // version NAVW111.00.00.28629,NAVE110.0,NAVBG10.0
-
-    //TODO:
-    //Prices Including VAT - OnValidate
-    //PROCEDURE GetNoSeriesCode()
-    //PROCEDURE GetPostingNoSeriesCode()    
-
     fields
     {
 

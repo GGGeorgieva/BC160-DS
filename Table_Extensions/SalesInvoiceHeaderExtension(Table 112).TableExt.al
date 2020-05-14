@@ -427,4 +427,5 @@ tableextension 46015509 "Sales Invoice Header Extension" extends "Sales Invoice 
         MESSAGE(Text46012127, "No.");
     end;
 }
+//
 

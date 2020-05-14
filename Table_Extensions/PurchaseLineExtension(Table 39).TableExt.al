@@ -293,4 +293,5 @@ tableextension 46015566 "Purchase Line Extension" extends "Purchase Line"
             until ExciseLabel.NEXT = 0;
     end;
 }
+//
 

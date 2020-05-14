@@ -1,7 +1,5 @@
 tableextension 46015591 "Transfer Shipment Line Ext." extends "Transfer Shipment Line"
 {
-    // version NAVW111.00,NAVBG11.0
-
     fields
     {
         field(46015505; "Inbound Excise Destination"; Code[2])
@@ -91,12 +89,5 @@ tableextension 46015591 "Transfer Shipment Line Ext." extends "Transfer Shipment
             TableRelation = "Payment Obligation Type";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
 }
 

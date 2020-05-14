@@ -1,90 +1,44 @@
 tableextension 46015532 "VAT Entry Extension" extends "VAT Entry"
 {
-    // version NAVW111.00.00.21836,NAVE111.0,NAVBG11.0
-
     fields
     {
 
-        //Unsupported feature: CodeModification on ""Bill-to/Pay-to No."(Field 12).OnValidate". Please convert manually.
+        modify("Bill-to/Pay-to No.")
+        {
+            trigger OnAfterValidate()
+            var
+                Vend: Record Vendor;
+                Cust: Record Customer;
+            begin
+                if "Bill-to/Pay-to No." = '' then begin
+                    "Registration No." := '';
+                end else
+                    case Type of
+                        Type::Purchase:
+                            begin
+                                Vend.GET("Bill-to/Pay-to No.");
+                                "Registration No." := Vend."Registration No.";
+                            end;
+                        Type::Sale:
+                            begin
+                                Cust.GET("Bill-to/Pay-to No.");
+                                "Registration No." := Cust."Registration No.";
+                            end;
+                    end;
+                Modify()
+            end;
 
-        //trigger "(Field 12)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        VALIDATE(Type);
-        if "Bill-to/Pay-to No." = '' then begin
-          "Country/Region Code" := '';
-          "VAT Registration No." := '';
-        end else
-          case Type of
-            Type::Purchase:
-              begin
-                Vend.GET("Bill-to/Pay-to No.");
-                "Country/Region Code" := Vend."Country/Region Code";
-                "VAT Registration No." := Vend."VAT Registration No.";
-              end;
-            Type::Sale:
-              begin
-                Cust.GET("Bill-to/Pay-to No.");
-                "Country/Region Code" := Cust."Country/Region Code";
-                "VAT Registration No." := Cust."VAT Registration No.";
-              end;
-          end;
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..4
+        }
 
-          //NAVE111.0; 001; begin
-          if LocalizationUsage.UseEastLocalization then
-            "Registration No." := '';
-          //NAVE111.0; 001; end
-
-        #5..11
-
-                //NAVE111.0; 001; begin
-                if LocalizationUsage.UseEastLocalization then
-                  "Registration No." := Vend."Registration No.";
-                //NAVE111.0; 001; end
-
-        #12..17
-
-                //NAVE111.0; 001; begin
-                if LocalizationUsage.UseEastLocalization then
-                  "Registration No." := Cust."Registration No.";
-                //NAVE111.0; 001; end
-
-              end;
-          end;
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""EU 3-Party Trade"(Field 13).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        VALIDATE(Type);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        VALIDATE(Type);
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if not "EU 3-Party Trade" then
-            "EU 3-Party Intermediate Role" := false;
-        //NAVE111.0; 001; end
-        */
-        //end;
+        modify("EU 3-Party Trade")
+        {
+            trigger OnAfterValidate()
+            begin
+                if not "EU 3-Party Trade" then
+                    "EU 3-Party Intermediate Role" := false;
+                Modify();
+            end;
+        }
         field(46015505; "Debit Memo"; Boolean)
         {
             Caption = 'Debit Memo';
@@ -230,15 +184,91 @@ tableextension 46015532 "VAT Entry Extension" extends "VAT Entry"
             OptionMembers = " ","01","02";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         PostponedVAT: Boolean;
         ErrTxt: Label 'ER';
+
+    PROCEDURE GetDocType() txtDocType: Text[2];
+    BEGIN
+        //NAVE111.0; 001; entire function
+        if "Debit Memo" then
+            exit('02');
+
+        if "Sales Protocol" then
+            exit('81');
+
+
+        case "Document Type" of
+            "Document Type"::" ":
+                exit('09');
+            "Document Type"::Invoice:
+                exit('01');
+            "Document Type"::"Credit Memo":
+                exit('03');
+        end;
+
+        exit(ErrTxt);
+    END;
+
+    PROCEDURE GetRegNo(): Code[20];
+    VAR
+        Customer: Record Customer;
+        Vendor: Record Vendor;
+    BEGIN
+        //NAVE111.0; 001; entire function
+        case "VAT Type" of
+            "VAT Type"::Sale:
+                if Customer.GET("Bill-to/Pay-to No.") then
+                    if Customer."VAT Registration No." <> '' then
+                        exit(Customer."VAT Registration No.");
+
+            "VAT Type"::Purchase:
+                if Vendor.GET("Bill-to/Pay-to No.") then
+                    if Vendor."VAT Registration No." <> '' then
+                        exit(Vendor."VAT Registration No.");
+        end;
+
+        exit("Identification No.");
+    END;
+
+    PROCEDURE GetContragentName(): Text[50];
+    VAR
+        Customer: Record Customer;
+        Vendor: Record Vendor;
+    BEGIN
+        //NAVE111.0; 001; entire function
+        if "Bill-to/Pay-to Name" = '' then
+            case "VAT Type" of
+                "VAT Type"::Sale:
+                    if Customer.GET("Bill-to/Pay-to No.") then
+                        exit(Customer.Name);
+
+                "VAT Type"::Purchase:
+                    if Vendor.GET("Bill-to/Pay-to No.") then
+                        exit(Vendor.Name);
+            end;
+
+        exit("Bill-to/Pay-to Name");
+    END;
+
+    PROCEDURE GetUnrealizedVatType2(PostponedVAT: Boolean) UnrealizedVatType: Integer;
+    VAR
+        VatPostingSetup: Record "VAT Posting Setup";
+        TaxJurisdiction: Record "Tax Jurisdiction";
+    BEGIN
+        //NAVE111.0; 001; entire function
+        if "VAT Calculation Type" = "VAT Calculation Type"::"Sales Tax" then begin
+            TaxJurisdiction.GET("Tax Jurisdiction Code");
+            UnrealizedVatType := TaxJurisdiction."Unrealized VAT Type";
+        end else begin
+            VatPostingSetup.GET("VAT Bus. Posting Group", "VAT Prod. Posting Group");
+            UnrealizedVatType := VatPostingSetup."Unrealized VAT Type";
+            if "Postponed VAT" then
+                if PostponedVAT then
+                    UnrealizedVatType := VatPostingSetup."Unrealized VAT Type"::Percentage
+                else
+                    UnrealizedVatType := 0;
+        end;
+    END;
 }
 

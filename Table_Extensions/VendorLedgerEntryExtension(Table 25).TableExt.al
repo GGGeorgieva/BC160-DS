@@ -1,7 +1,5 @@
 tableextension 46015530 "Vendor Ledger Entry Ext." extends "Vendor Ledger Entry"
 {
-    // version NAVW111.00.00.27667,NAVE111.0
-
     fields
     {
         field(46015610; "VAT Date"; Date)
@@ -24,7 +22,7 @@ tableextension 46015530 "Vendor Ledger Entry Ext." extends "Vendor Ledger Entry"
     keys
     {
 
-        //TO DO
+        //TODO How extend keys??
         /*
         key(Key1;"Vendor No.","Currency Code","Vendor Posting Group","Document Type")
         {
@@ -40,11 +38,6 @@ tableextension 46015530 "Vendor Ledger Entry Ext." extends "Vendor Ledger Entry"
         }
         */
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
 
 }
 

@@ -112,18 +112,75 @@ tableextension 46015588 "Value Entry Extension" extends "Value Entry"
     }
     keys
     {
-        //TO DO
+        //TODO HOW KEYS EXTENDED ?
         /*
         key(Key1;"Entry Type","Expected Cost","Calculate Excise","Item No.","Posting Date")
         {
         }
         */
     }
+    PROCEDURE AddActualCostBuf(ValueEntry: Record "Value Entry"; NewAdjustedCost: Decimal; NewAdjustedCostACY: Decimal; ItemLedgEntryPostingDate: Date);
+    BEGIN
+        //NAVE111.0; 001; entire function
+        RESET;
+        "Entry No." := ValueEntry."Entry No.";
+        if FIND then begin
+            if ValueEntry."Expected Cost" then begin
+                "Cost Amount (Expected)" := "Cost Amount (Expected)" + NewAdjustedCost;
+                "Cost Amount (Expected) (ACY)" := "Cost Amount (Expected) (ACY)" + NewAdjustedCostACY;
+            end else begin
+                "Cost Amount (Actual)" := "Cost Amount (Actual)" + NewAdjustedCost;
+                "Cost Amount (Actual) (ACY)" := "Cost Amount (Actual) (ACY)" + NewAdjustedCostACY;
+            end;
+            MODIFY;
+        end else begin
+            INIT;
+            "Item No." := ValueEntry."Item No.";
+            "Document No." := ValueEntry."Document No.";
+            "Location Code" := ValueEntry."Location Code";
+            "Variant Code" := ValueEntry."Variant Code";
+            "Entry Type" := ValueEntry."Entry Type";
+            "Item Ledger Entry No." := ValueEntry."Item Ledger Entry No.";
+            "Expected Cost" := ValueEntry."Expected Cost";
+            if ItemLedgEntryPostingDate = 0D then
+                "Posting Date" := ValueEntry."Posting Date"
+            else
+                "Posting Date" := ItemLedgEntryPostingDate;
+            if ValueEntry."Expected Cost" then begin
+                "Cost Amount (Expected)" := NewAdjustedCost;
+                "Cost Amount (Expected) (ACY)" := NewAdjustedCostACY;
+            end else begin
+                "Cost Amount (Actual)" := NewAdjustedCost;
+                "Cost Amount (Actual) (ACY)" := NewAdjustedCostACY;
+            end;
+            "Valued By Average Cost" := ValueEntry."Valued By Average Cost";
+            "Valuation Date" := ValueEntry."Valuation Date";
+            INSERT;
+        end;
+    END;
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
+    PROCEDURE AddBalanceExpectedCostBuf(ValueEntry: Record "Value Entry"; NewAdjustedCost: Decimal; NewAdjustedCostACY: Decimal);
+    BEGIN
+        //NAVE111.0; 001; entire function
+        if ValueEntry."Expected Cost" or
+           (ValueEntry."Entry Type" <> ValueEntry."Entry Type"::"Direct Cost")
+        then
+            exit;
 
+        RESET;
+        "Entry No." := ValueEntry."Entry No.";
+        FIND;
+        "Cost Amount (Expected)" := NewAdjustedCost;
+        "Cost Amount (Expected) (ACY)" := NewAdjustedCostACY;
+        MODIFY;
+    END;
 
-    //Unsupported feature: PropertyChange. Please convert manually.
-
+    PROCEDURE GetCostAmt(): Decimal;
+    BEGIN
+        //NAVE111.0; 001; entire function
+        if "Cost Amount (Actual)" = 0 then
+            exit("Cost Amount (Expected)");
+        exit("Cost Amount (Actual)");
+    END;
 }
 

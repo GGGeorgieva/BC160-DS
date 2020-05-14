@@ -4,64 +4,42 @@ tableextension 46015583 "Transfer Line Extension" extends "Transfer Line"
 
     fields
     {
+        modify("Item No.")
+        {
+            trigger OnAfterValidate()
+            begin
+                GetTransHeaderBG();
+                lLocation.GET("Transfer-from Code");
+                lLocation1.GET("Transfer-to Code");
+                if ((lLocation."Excise Tax Warehouse" = true) and (lLocation1."Excise Tax Warehouse" = false))
+                  or ((lLocation."Excise Tax Warehouse" = true) and (lLocation1."Excise Tax Warehouse" = true) and
+                      (lLocation."License No." <> lLocation1."License No."))
+                then begin
+                    "Additional Excise Code" := Item."Additional Excise Code";
+                    "Unit Excise" := Item."Unit Excise (LCY)";
+                    "Excise Item" := Item."Excise Item";
+                    "CN Code" := Item."Tariff No.";
+                    "Alcohol Content/Degree Plato" := Item."Degree / KW";
+                    "Excise Unit of Measure" := Item."Excise Decl. Unit of Measure";
+                    "Excise Rate" := Item."Excise Per Exc. Decl. UM (LCY)";
+                    "Calculate Excise" := Item."Excise Item";
+                end;
+                if ExciseDestination.GET(Item."Excise Destination") then begin
+                    case ExciseDestination."Destination Type" of
+                        ExciseDestination."Destination Type"::Inbound:
+                            "Inbound Excise Destination" := Item."Excise Destination";
+                        ExciseDestination."Destination Type"::Outbound:
+                            "Outbound Excise Destination" := Item."Excise Destination";
+                    end;
 
-        //Unsupported feature: CodeModification on ""Item No."(Field 3).OnValidate". Please convert manually.
+                    "Inbound Excise Destination" := TransHeader."Inbound Excise Destination";
+                    "Outbound Excise Destination" := TransHeader."Outbound Excise Destination";
+                    Modify();
+                end;
 
-        //trigger "(Field 3)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD("Quantity Shipped",0);
-        if CurrFieldNo <> 0 then
-          TestStatusOpen;
-        #4..33
-        "Item Category Code" := Item."Item Category Code";
-        "Product Group Code" := Item."Product Group Code";
-
-        CreateDim(DATABASE::Item,"Item No.");
-        DimMgt.UpdateGlobalDimFromDimSetID("Dimension Set ID","Shortcut Dimension 1 Code","Shortcut Dimension 2 Code");
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..36
-        //NAVBG11.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          lLocation.GET("Transfer-from Code" );
-          lLocation1.GET("Transfer-to Code");
-          if ((lLocation."Excise Tax Warehouse"  = true) and (lLocation1."Excise Tax Warehouse" = false ) )
-            or ((lLocation."Excise Tax Warehouse"  = true) and (lLocation1."Excise Tax Warehouse" = true )  and
-                (lLocation."License No."<>lLocation1."License No."))
-          then begin
-            "Additional Excise Code" := Item."Additional Excise Code";
-            "Unit Excise"  :=Item."Unit Excise (LCY)";
-            "Excise Item"  :=Item."Excise Item";
-            "CN Code" := Item."Tariff No.";
-            "Alcohol Content/Degree Plato"  :=Item."Degree / KW";
-            "Excise Unit of Measure":=Item."Excise Decl. Unit of Measure";
-            "Excise Rate":=Item."Excise Per Exc. Decl. UM (LCY)";
-            "Calculate Excise":=  Item."Excise Item";
-          end;
-          if ExciseDestination.GET(Item."Excise Destination") then begin
-            case ExciseDestination."Destination Type" of
-              ExciseDestination."Destination Type"::Inbound:
-                "Inbound Excise Destination" := Item."Excise Destination";
-              ExciseDestination."Destination Type"::Outbound:
-                "Outbound Excise Destination" := Item."Excise Destination";
             end;
+        }
 
-          "Inbound Excise Destination" := TransHeader."Inbound Excise Destination";
-          "Outbound Excise Destination" :=TransHeader."Outbound Excise Destination";
-          end;
-        end;
-        //NAVBG11.0; 001; end
-
-        CreateDim(DATABASE::Item,"Item No.");
-        DimMgt.UpdateGlobalDimFromDimSetID("Dimension Set ID","Shortcut Dimension 1 Code","Shortcut Dimension 2 Code");
-        */
-        //end;
         field(46015607; "Tariff No."; Code[10])
         {
             Caption = 'Tariff No.';
@@ -137,9 +115,7 @@ tableextension 46015583 "Transfer Line Extension" extends "Transfer Line"
                     "Alcohol Content/Degree Plato" := lItem."Degree / KW";
                     "Excise Unit of Measure" := lItem."Excise Decl. Unit of Measure";
                     "Excise Rate" := lItem."Excise Per Exc. Decl. UM (LCY)";
-
-                    //TO DO
-                    //UpdateExciseAmounts;
+                    UpdateExciseAmounts;
                 end
                 else begin
 
@@ -150,8 +126,7 @@ tableextension 46015583 "Transfer Line Extension" extends "Transfer Line"
                     "Alcohol Content/Degree Plato" := 0;
                     "Excise Unit of Measure" := '';
                     "Excise Rate" := 0;
-                    //TO DO
-                    //UpdateExciseAmounts;
+                    UpdateExciseAmounts;
                 end;
             end;
         }
@@ -187,17 +162,52 @@ tableextension 46015583 "Transfer Line Extension" extends "Transfer Line"
             TableRelation = "Payment Obligation Type";
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         lLocation: Record Location;
         lLocation1: Record Location;
         ExciseDestination: Record "Excise Destination";
+        TransHeader: Record "Transfer Header";
+        Item: Record Item;
+
+    LOCAL PROCEDURE GetTransHeaderBG();
+    BEGIN
+        GetTransferHeaderNoVerificationBG();
+
+        TransHeader.TESTFIELD("Shipment Date");
+        TransHeader.TESTFIELD("Receipt Date");
+        TransHeader.TESTFIELD("Transfer-from Code");
+        TransHeader.TESTFIELD("Transfer-to Code");
+        if not TransHeader."Direct Transfer" and ("Direct Transfer" = xRec."Direct Transfer") then
+            TransHeader.TESTFIELD("In-Transit Code");
+        "In-Transit Code" := TransHeader."In-Transit Code";
+        "Transfer-from Code" := TransHeader."Transfer-from Code";
+        "Transfer-to Code" := TransHeader."Transfer-to Code";
+        "Shipment Date" := TransHeader."Shipment Date";
+        "Receipt Date" := TransHeader."Receipt Date";
+        "Shipping Agent Code" := TransHeader."Shipping Agent Code";
+        "Shipping Agent Service Code" := TransHeader."Shipping Agent Service Code";
+        "Shipping Time" := TransHeader."Shipping Time";
+        "Outbound Whse. Handling Time" := TransHeader."Outbound Whse. Handling Time";
+        "Inbound Whse. Handling Time" := TransHeader."Inbound Whse. Handling Time";
+        Status := TransHeader.Status;
+        "Direct Transfer" := TransHeader."Direct Transfer";
+        "Payment Obligation Type" := TransHeader."Payment Obligation Type";
+    END;
+
+    LOCAL PROCEDURE GetTransferHeaderNoVerificationBG();
+    BEGIN
+        TESTFIELD("Document No.");
+        if "Document No." <> TransHeader."No." then
+            TransHeader.GET("Document No.");
+    END;
+
+    PROCEDURE UpdateExciseAmounts();
+    BEGIN
+        "Excise Amount" := "Unit Excise" * Quantity;
+        Item.GET("Item No.");
+        if Item."Excise Per Exc. Decl. UM (LCY)" > 0 then
+            "Excise Charge Acc. Base" := "Excise Amount" / Item."Excise Per Exc. Decl. UM (LCY)";
+    END;
 
 }
 

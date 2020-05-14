@@ -68,7 +68,7 @@ tableextension 46015594 "Transfer Receipt Header Ext." extends "Transfer Receipt
         }
     }
 
-    trigger OnBeforeDelete();
+    trigger OnDelete();
     begin
         ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
         ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
@@ -78,7 +78,5 @@ tableextension 46015594 "Transfer Receipt Header Ext." extends "Transfer Receipt
 
     var
         ExciseTaxDoc: Record "Excise Tax Document";
-
-
 }
 

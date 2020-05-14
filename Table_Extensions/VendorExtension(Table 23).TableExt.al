@@ -1,7 +1,5 @@
 tableextension 46015528 "Vendor Extension" extends Vendor
 {
-    // version NAVW111.00.00.27667,NAVE111.0,NAVBG11.0
-
     fields
     {
         field(46015505; "Identification No."; Text[13])
@@ -93,71 +91,6 @@ tableextension 46015528 "Vendor Extension" extends Vendor
             TableRelation = "Excise Registration Type";
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    ApprovalsMgmt.OnCancelVendorApprovalRequest(Rec);
-
-    MoveEntries.MoveVendorEntries(Rec);
-    #4..62
-    PurchPrepmtPct.SETRANGE("Vendor No.","No.");
-    PurchPrepmtPct.DELETEALL(true);
-
-    VATRegistrationLogMgt.DeleteVendorLog(Rec);
-
-    IntrastatSetup.CheckDeleteIntrastatContact(IntrastatSetup."Intrastat Contact Type"::Vendor,"No.");
-
-    CalendarManagement.DeleteCustomizedBaseCalendarData(CustomizedCalendarChange."Source Type"::Vendor,"No.");
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..65
-
-    #66..70
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnModify". Please convert manually.
-
-    //trigger OnModify();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    SetLastModifiedDateTime;
-    if IsContactUpdateNeeded then begin
-      MODIFY;
-      UpdateContFromVend.OnModify(Rec);
-      if not FIND then begin
-        RESET;
-        if FIND then;
-      end;
-    end;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..8
-      end;
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         DefDim: Codeunit "BG Utils";
         DimValue: Record Vendor;
@@ -166,5 +99,22 @@ tableextension 46015528 "Vendor Extension" extends Vendor
         GLSetup: Record "General Ledger Setup";
         DimensionValue2: Record "Dimension Value";
         Text46012225: Label 'Vendor with the same %1 already exists.';
+
+    PROCEDURE GetLinkedCustomer(): Code[20];
+    VAR
+        ContBusRel: Record "Contact Business Relation";
+    BEGIN
+        //NAVE111.0; 001; entire function
+        ContBusRel.SETCURRENTKEY("Link to Table", "No.");
+        ContBusRel.SETRANGE("Link to Table", ContBusRel."Link to Table"::Vendor);
+        ContBusRel.SETRANGE("No.", "No.");
+        if ContBusRel.FINDFIRST then begin
+            ContBusRel.SETRANGE("Contact No.", ContBusRel."Contact No.");
+            ContBusRel.SETRANGE("Link to Table", ContBusRel."Link to Table"::Customer);
+            ContBusRel.SETRANGE("No.");
+            if ContBusRel.FINDFIRST then
+                exit(ContBusRel."No.");
+        end;
+    END;
 }
 

@@ -1,10 +1,7 @@
 tableextension 46015533 "VAT Statement Line Extension" extends "VAT Statement Line"
 {
-    // version NAVW111.00,NAVE111.0
-
     fields
     {
-
         field(46015605; "G/L Amount Type"; Option)
         {
             Caption = 'G/L Amount Type';
@@ -57,11 +54,5 @@ tableextension 46015533 "VAT Statement Line Extension" extends "VAT Statement Li
             OptionMembers = " ",Yes,No;
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

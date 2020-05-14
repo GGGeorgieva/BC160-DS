@@ -1,7 +1,5 @@
 tableextension 46015609 "User Setup Extension" extends "User Setup"
 {
-    // version NAVW111.00.00.23572,NAVE111.0
-
     fields
     {
         field(46015605; "Allow VAT Posting From"; Date)
@@ -15,11 +13,5 @@ tableextension 46015609 "User Setup Extension" extends "User Setup"
             Description = 'NAVE111.0,001';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 }
 

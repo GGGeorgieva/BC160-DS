@@ -1,23 +1,15 @@
 tableextension 46015555 "VAT Posting Setup Extension" extends "VAT Posting Setup"
 {
-    // version NAVW111.00.00.21836,NAVE111.0,NAVBG11.0
-
     fields
     {
-
-        //Unsupported feature: CodeInsertion on ""VAT Calculation Type"(Field 3)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if ("VAT Calculation Type" <> "VAT Calculation Type"::"Normal VAT") and ("VAT Calculation Type" <> "VAT Calculation Type"::"Full VAT") then
-            TESTFIELD("Allow Non Deductible VAT",false);
-        //NAVE111.0; 001; end
-        */
-        //end;
+        modify("VAT Calculation Type")
+        {
+            trigger OnBeforeValidate()
+            begin
+                if ("VAT Calculation Type" <> "VAT Calculation Type"::"Normal VAT") and ("VAT Calculation Type" <> "VAT Calculation Type"::"Full VAT") then
+                    TESTFIELD("Allow Non Deductible VAT", false);
+            end;
+        }
         field(46015505; "Sales VAT Ledger"; Option)
         {
             Caption = 'Sales VAT Ledger';
@@ -119,14 +111,6 @@ tableextension 46015555 "VAT Posting Setup Extension" extends "VAT Posting Setup
             Description = 'NAVBG11.0.007';
         }
     }
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
-
     var
         VatCalcTypeError: Label 'VAT Calculation Type must be "Full VAT" or "Normal VAT"';
 }

@@ -24,6 +24,7 @@ tableextension 46015584 "Transfer Header Extension" extends "Transfer Header"
                         end;
                     end;
                 end;
+                Modify();
             end;
         }
 

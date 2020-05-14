@@ -1,32 +1,28 @@
 tableextension 46015611 "Vendor Posting Group Ext." extends "Vendor Posting Group"
 {
-    // version NAVW111.00.00.24742,NAVE111.0
+    trigger OnDelete();
+    begin
+        DeleteSubstPostingGroups;
+    end;
 
+    PROCEDURE GetPayablesAccNo(PostingGroupCode: Code[10]): Code[20];
+    BEGIN
+        //NAVE111.0; 001; entire function
+        GET(PostingGroupCode);
+        TESTFIELD("Payables Account");
+        exit("Payables Account");
+    END;
 
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    CheckGroupUsage;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    CheckGroupUsage;
-    //NAVE111.0; 001; single
-    if LocalizationUsage.UseEastLocalization then
-      DeleteSubstPostingGroups;
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
+    PROCEDURE DeleteSubstPostingGroups();
+    VAR
+        SubstVendPostingGroup: Record "Subst. Vendor Posting Group";
+    BEGIN
+        //NAVE111.0; 001; entire function
+        SubstVendPostingGroup.SETRANGE("Parent Vend. Posting Group", Code);
+        SubstVendPostingGroup.DELETEALL;
+        SubstVendPostingGroup.RESET;
+        SubstVendPostingGroup.SETRANGE("Vendor Posting Group", Code);
+        SubstVendPostingGroup.DELETEALL;
+    END;
 }
 

@@ -1,7 +1,5 @@
 tableextension 46015587 "Transfer Shipment Header Ext." extends "Transfer Shipment Header"
 {
-    // version NAVW111.00.00.20783,NAVBG11.0
-
     fields
     {
         field(46015505; "Excise Tax Document No."; Code[20])
@@ -70,46 +68,13 @@ tableextension 46015587 "Transfer Shipment Header Ext." extends "Transfer Shipme
         }
     }
 
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    TransShptLine.SETRANGE("Document No.","No.");
-    if TransShptLine.FIND('-') then
-      repeat
-    #4..10
-    ItemTrackingMgt.DeleteItemEntryRelation(
-      DATABASE::"Transfer Shipment Line",0,"No.",'',0,0,true);
-
-    MoveEntries.MoveDocRelatedEntries(DATABASE::"Transfer Shipment Header","No.");
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..13
-    //NAVBG11.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type",ExciseTaxDoc."Document Type"::"Posted Transfer Shipment");
-      ExciseTaxDoc.DELETEALL;
+    trigger OnBeforeDelete();
+    begin
+        ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", ExciseTaxDoc."Document Type"::"Posted Transfer Shipment");
+        ExciseTaxDoc.DELETEALL;
     end;
-    //NAVBG11.0; 001; end
-
-    MoveEntries.MoveDocRelatedEntries(DATABASE::"Transfer Shipment Header","No.");
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
 
     var
         ExciseTaxDoc: Record "Excise Tax Document";

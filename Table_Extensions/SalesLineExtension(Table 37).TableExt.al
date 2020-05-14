@@ -715,4 +715,4 @@ tableextension 46015577 "Sales Line Extension" extends "Sales Line"
             "Prepmt. Line Amount" := "Amount Including VAT";
     end;
 }
-
+//

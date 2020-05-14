@@ -61,4 +61,161 @@ codeunit 46015802 "Sales Line Subscribers"
         SalesLine."Calculate Excise (Cust.)" := SalesHeader."Calculate Excise";
         SalesLine."Calculate Product Tax (Cust.)" := SalesHeader."Calculate Product Tax";
     end;
+
+
+
+    [EventSubscriber(ObjectType::Table, DATABASE::"Sales Line", 'OnUpdateVATAmountsOnAfterSetSalesLineFilters', '', true, true)]
+    local procedure UpdateVATAmounts(var SalesLine: Record "Sales Line"; var SalesLine2: Record "Sales Line"; var IsHandled: Boolean)
+    var
+        SalesHeader: Record "Sales Header";
+        Currency: Record Currency;
+        SalesTaxCalculate: Codeunit "Sales Tax Calculate";
+        TotalLineAmount: Decimal;
+        TotalInvDiscAmount: Decimal;
+        TotalAmount: Decimal;
+        TotalAmountInclVAT: Decimal;
+        TotalQuantityBase: Decimal;
+        TotalAmountInclTaxExclVAT: Decimal;
+    begin
+        Currency.GET(SalesLine."Currency Code");
+        SalesHeader.GET(SalesLine."Document Type", SalesLine."Document No.");
+        if SalesLine."Line Amount" = SalesLine."Inv. Discount Amount" then begin
+            SalesLine."Amount Incl. Taxes Excl. VAT" := 0;
+            SalesLine.Amount := -SalesLine."Excise Amount" - SalesLine."Product Tax Amount";
+
+            SalesLine."VAT Base Amount" := 0;
+            SalesLine."Amount Including VAT" := 0;
+            //TODO; parameter xrec missing
+            /*
+            if (SalesLine.Quantity = 0) and (xRec.Quantity <> 0) and (xRec.Amount <> 0) then begin
+            if SalesLine."Line No." <> 0 then
+                SalesLine.MODIFY;
+            SalesLine2.SETFILTER(Amount,'<>0');
+            if SalesLine2.FIND('<>') then begin
+                SalesLine2.VALIDATE("Line Discount %");
+                SalesLine2.MODIFY;
+            end;
+            end;
+            */
+
+        end else begin
+            TotalLineAmount := 0;
+            TotalInvDiscAmount := 0;
+            TotalAmount := 0;
+            TotalAmountInclTaxExclVAT := 0;
+            TotalAmountInclVAT := 0;
+            TotalQuantityBase := 0;
+            if (SalesLine."VAT Calculation Type" = SalesLine."VAT Calculation Type"::"Sales Tax") or
+            ((SalesLine."VAT Calculation Type" in
+                [SalesLine."VAT Calculation Type"::"Normal VAT", SalesLine."VAT Calculation Type"::"Reverse Charge VAT"]) and (SalesLine."VAT %" <> 0))
+            then
+                if not SalesLine2.ISEMPTY then begin
+                    SalesLine2.CALCSUMS("Line Amount", "Inv. Discount Amount", Amount, "Amount Including VAT", "Quantity (Base)", "Amount Incl. Taxes Excl. VAT");
+
+                    TotalLineAmount := SalesLine2."Line Amount";
+                    TotalInvDiscAmount := SalesLine2."Inv. Discount Amount";
+                    TotalAmount := SalesLine2.Amount;
+                    TotalAmountInclVAT := SalesLine2."Amount Including VAT";
+                    TotalQuantityBase := SalesLine2."Quantity (Base)";
+                    TotalAmountInclTaxExclVAT := SalesLine2."Amount Incl. Taxes Excl. VAT";
+                end;
+
+
+            if SalesHeader."Prices Including VAT" then
+                case SalesLine."VAT Calculation Type" of
+                    SalesLine."VAT Calculation Type"::"Normal VAT",
+                    SalesLine."VAT Calculation Type"::"Reverse Charge VAT":
+                        begin
+                            SalesLine."Amount Incl. Taxes Excl. VAT" :=
+                                ROUND(
+                                (TotalLineAmount - TotalInvDiscAmount + SalesLine."Line Amount" - SalesLine."Inv. Discount Amount") / (1 + SalesLine."VAT %" / 100),
+                                Currency."Amount Rounding Precision") -
+                                TotalAmountInclTaxExclVAT;
+                            SalesLine.Amount := SalesLine."Amount Incl. Taxes Excl. VAT" - SalesLine."Excise Amount";
+                            SalesLine."VAT Base Amount" :=
+                                ROUND(
+                                SalesLine."Amount Incl. Taxes Excl. VAT" * (1 - SalesHeader."VAT Base Discount %" / 100),
+                                Currency."Amount Rounding Precision");
+                            SalesLine."Amount Including VAT" :=
+                                TotalAmountInclTaxExclVAT + SalesLine."Amount Incl. Taxes Excl. VAT" +
+                                ROUND(
+                                (TotalAmountInclTaxExclVAT + SalesLine."Amount Incl. Taxes Excl. VAT") *
+                                (SalesHeader."VAT Base Discount %" / 100) * SalesLine."VAT %" / 100,
+                                Currency."Amount Rounding Precision", Currency.VATRoundingDirection) -
+                                TotalAmountInclVAT - TotalInvDiscAmount - SalesLine."Inv. Discount Amount";
+
+                        end;
+                    SalesLine."VAT Calculation Type"::"Full VAT":
+                        begin
+                            SalesLine.Amount := 0;
+                            SalesLine."Amount Incl. Taxes Excl. VAT" := 0;
+                            SalesLine."VAT Base Amount" := 0;
+                        end;
+                    SalesLine."VAT Calculation Type"::"Sales Tax":
+                        begin
+                            SalesHeader.TESTFIELD("VAT Base Discount %", 0);
+                            SalesLine."Amount Incl. Taxes Excl. VAT" :=
+                                SalesTaxCalculate.ReverseCalculateTax(
+                                SalesLine."Tax Area Code", SalesLine."Tax Group Code", SalesLine."Tax Liable", SalesHeader."Posting Date",
+                                TotalAmountInclVAT + SalesLine."Amount Including VAT", TotalQuantityBase + SalesLine."Quantity (Base)",
+                                SalesHeader."Currency Factor") - TotalAmountInclTaxExclVAT;
+                            if SalesLine."Amount Incl. Taxes Excl. VAT" <> 0 then
+                                SalesLine."VAT %" :=
+                                ROUND(100 * (SalesLine."Amount Including VAT" - SalesLine."Amount Incl. Taxes Excl. VAT") / SalesLine."Amount Incl. Taxes Excl. VAT", 0.00001)
+                            else
+                                SalesLine."VAT %" := 0;
+                            SalesLine."Amount Incl. Taxes Excl. VAT" := ROUND(SalesLine."Amount Incl. Taxes Excl. VAT", Currency."Amount Rounding Precision");
+                            SalesLine."VAT Base Amount" := SalesLine."Amount Incl. Taxes Excl. VAT";
+
+
+                        end;
+                end
+            else
+                case SalesLine."VAT Calculation Type" of
+                    SalesLine."VAT Calculation Type"::"Normal VAT",
+                    SalesLine."VAT Calculation Type"::"Reverse Charge VAT":
+                        begin
+                            SalesLine."Amount Incl. Taxes Excl. VAT" := ROUND(SalesLine."Line Amount" - SalesLine."Inv. Discount Amount", Currency."Amount Rounding Precision");
+                            SalesLine.Amount := SalesLine."Amount Incl. Taxes Excl. VAT" - SalesLine."Excise Amount";
+                            SalesLine."VAT Base Amount" :=
+                                ROUND(SalesLine."Amount Incl. Taxes Excl. VAT" * (1 - SalesHeader."VAT Base Discount %" / 100), Currency."Amount Rounding Precision");
+                            SalesLine."Amount Including VAT" :=
+                                TotalAmountInclTaxExclVAT + SalesLine."Amount Incl. Taxes Excl. VAT" +
+                                ROUND(
+                                (TotalAmountInclTaxExclVAT + SalesLine."Amount Incl. Taxes Excl. VAT") *
+                                (1 - SalesHeader."VAT Base Discount %" / 100) * SalesLine."VAT %" / 100,
+                                Currency."Amount Rounding Precision", Currency.VATRoundingDirection) -
+                                TotalAmountInclVAT;
+                        end;
+                    SalesLine."VAT Calculation Type"::"Full VAT":
+                        begin
+                            SalesLine.Amount := 0;
+                            SalesLine."VAT Base Amount" := 0;
+                            SalesLine."Amount Incl. Taxes Excl. VAT" := 0;
+                            SalesLine."Amount Including VAT" := SalesLine."Line Amount" - SalesLine."Inv. Discount Amount";
+                        end;
+                    SalesLine."VAT Calculation Type"::"Sales Tax":
+                        begin
+                            SalesLine."Amount Incl. Taxes Excl. VAT" := ROUND(SalesLine."Line Amount" - SalesLine."Inv. Discount Amount", Currency."Amount Rounding Precision");
+                            SalesLine.Amount := SalesLine."Amount Incl. Taxes Excl. VAT" - SalesLine."Excise Amount";
+                            SalesLine."VAT Base Amount" := SalesLine."Amount Incl. Taxes Excl. VAT";
+                            SalesLine."Amount Including VAT" :=
+                                TotalAmountInclTaxExclVAT + SalesLine."Amount Incl. Taxes Excl. VAT" +
+                                ROUND(
+                                SalesTaxCalculate.CalculateTax(
+                                    SalesLine."Tax Area Code", SalesLine."Tax Group Code", SalesLine."Tax Liable", SalesHeader."Posting Date",
+                                    (TotalAmountInclTaxExclVAT + SalesLine."Amount Incl. Taxes Excl. VAT"), (TotalQuantityBase + SalesLine."Quantity (Base)"),
+                                    SalesHeader."Currency Factor"), Currency."Amount Rounding Precision") -
+                                TotalAmountInclVAT;
+                            if SalesLine."VAT Base Amount" <> 0 then
+                                SalesLine."VAT %" :=
+                                    ROUND(100 * (SalesLine."Amount Including VAT" - SalesLine."VAT Base Amount") / SalesLine."VAT Base Amount", 0.00001)
+                            else
+                                SalesLine."VAT %" := 0;
+                        end;
+                end;
+        end;
+        IsHandled := true;
+    end;
+    //
 }

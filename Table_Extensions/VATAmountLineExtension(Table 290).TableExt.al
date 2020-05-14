@@ -1,7 +1,5 @@
 tableextension 46015544 "VAT Amount Line Extension" extends "VAT Amount Line"
 {
-    // version NAVW111.00.00.24742,NAVE111.0,NAVBG11.0
-
     fields
     {
         field(46015505; "Amount Incl. Taxes Excl. VAT"; Decimal)
@@ -45,11 +43,19 @@ tableextension 46015544 "VAT Amount Line Extension" extends "VAT Amount Line"
             Editable = false;
         }
     }
+    PROCEDURE GetTotalAmountExclTaxes(): Decimal;
+    VAR
+        AmountExclTaxes: Decimal;
+    BEGIN
+        //NAVE111.0; 001; entire function
+        AmountExclTaxes := 0;
 
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
+        if FIND('-') then
+            repeat
+                AmountExclTaxes := AmountExclTaxes + "Amount Excl. Taxes";
+            until NEXT = 0;
+        exit(AmountExclTaxes);
+    END;
 
 }
 

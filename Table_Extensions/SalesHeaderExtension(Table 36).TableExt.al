@@ -2,529 +2,235 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
 {
     // version NAVW111.00.00.28629,NAVE110.0,NAVBG10.0
 
-    //TODO
+    //TODO:
+    //Prices Including VAT - OnValidate
+    //PROCEDURE GetNoSeriesCode()
+    //PROCEDURE GetPostingNoSeriesCode()    
 
     fields
     {
 
-        //Unsupported feature: CodeModification on ""Sell-to Customer No."(Field 2).OnValidate". Please convert manually.
-
-        //trigger "(Field 2)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        CheckCreditLimitIfLineNotInsertedYet;
-        if "No." = '' then
-          InitRecord;
-        #4..75
-        "Responsibility Center" := UserSetupMgt.GetRespCenter(0,Cust."Responsibility Center");
-        VALIDATE("Location Code",UserSetupMgt.GetLocation(0,Cust."Location Code","Responsibility Center"));
-
-        if "Sell-to Customer No." = xRec."Sell-to Customer No." then
-          if ShippedSalesLinesExist or ReturnReceiptExist then begin
-            TESTFIELD("VAT Bus. Posting Group",xRec."VAT Bus. Posting Group");
-        #82..108
-
-        if (xRec."Sell-to Customer No." <> '') and (xRec."Sell-to Customer No." <> "Sell-to Customer No.") then
-          RecallModifyAddressNotification(GetModifyCustomerAddressNotificationId);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..78
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          "Registration No." := Cust."Registration No.";
-          "Registration No. 2" := Cust."Registration No. 2";
-          "Identification No." := Cust."Identification No.";
-
-          VALIDATE("Transaction Type",Cust."Transaction Type");
-          VALIDATE("Transaction Specification",Cust."Transaction Specification");
-          VALIDATE("Transport Method",Cust."Transport Method");
-          if "Document Type" in ["Document Type"::"Return Order","Document Type"::"Credit Memo"] then
-            VALIDATE("Shipment Method Code",Cust."Shipment Method Code");
-        end;
-        //NAVE110.0; 001; end
-
-        #79..111
-        //NAVBG10.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          if "Sell-to Customer No." <> xRec."Sell-to Customer No." then
+        modify("Sell-to Customer No.")
+        {
+            trigger OnAfterValidate()
+            var
+                Cust: Record Customer;
             begin
-              ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-              ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-              ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type","Document Type");
-              if ExciseTaxDoc.FINDFIRST then begin
-                ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Sell-to Customer No.","Sell-to Customer No.");
-                ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Sell-to Customer Name","Sell-to Customer Name");
-                ExciseTaxDoc.MODIFY;
-              end;
+                Cust.GET("Sell-to Customer No.");
+                "Registration No." := Cust."Registration No.";
+                "Registration No. 2" := Cust."Registration No. 2";
+                "Identification No." := Cust."Identification No.";
+
+                VALIDATE("Transaction Type", Cust."Transaction Type");
+                VALIDATE("Transaction Specification", Cust."Transaction Specification");
+                VALIDATE("Transport Method", Cust."Transport Method");
+                if "Document Type" in ["Document Type"::"Return Order", "Document Type"::"Credit Memo"] then
+                    VALIDATE("Shipment Method Code", Cust."Shipment Method Code");
+
+                if "Sell-to Customer No." <> xRec."Sell-to Customer No." then begin
+                    ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+                    ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+                    ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", "Document Type");
+                    if ExciseTaxDoc.FINDFIRST then begin
+                        ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Sell-to Customer No.", "Sell-to Customer No.");
+                        ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Sell-to Customer Name", "Sell-to Customer Name");
+                        ExciseTaxDoc.MODIFY;
+                    end;
+                end;
+                "Calculate Excise" := not Cust."Do not calculate Excise";
+                MODIFY;
             end;
-          "Calculate Excise" := not Cust."Do not calculate Excise";
-        end;
-        //NAVBG10.0; 001; end
-        */
-        //end;
+        }
 
+        modify("Bill-to Customer No.")
+        {
+            trigger OnAfterValidate()
+            var
+                CustCheckCreditLimit: Codeunit "Cust-Check Cr. Limit";
+                Cust: Record Customer;
+            begin
+                if GUIALLOWED and (CurrFieldNo <> 0) and ("Document Type".AsInteger() <= "Document Type"::Invoice.AsInteger()) then begin
+                    "Amount Including VAT" := 0;
+                    case "Document Type" of
+                        "Document Type"::Quote, "Document Type"::Invoice:
+                            CustCheckCreditLimit.SalesHeaderCheck(Rec);
+                        "Document Type"::Order:
+                            begin
+                                if "Bill-to Customer No." <> xRec."Bill-to Customer No." then begin
+                                    SalesLine.SETRANGE("Document Type", SalesLine."Document Type"::Order);
+                                    SalesLine.SETRANGE("Document No.", "No.");
+                                    SalesLine.CALCSUMS("Outstanding Amount", "Shipped Not Invoiced");
+                                    "Amount Including VAT" := SalesLine."Outstanding Amount" + SalesLine."Shipped Not Invoiced";
+                                end;
+                                CustCheckCreditLimit.SalesHeaderCheck(Rec);
+                            end;
+                    end;
+                    CALCFIELDS("Amount Including VAT");
+                end;
 
-        //Unsupported feature: CodeModification on ""Bill-to Customer No."(Field 4).OnValidate". Please convert manually.
+                Cust.GET("Bill-to Customer No.");
+                "VAT Country/Region Code" := Cust."Country/Region Code";
+                "VAT Registration No." := Cust."VAT Registration No.";
+                "Industry Code" := Cust."Industry Code";
+                "Registration No." := Cust."Registration No.";
+                "Identification No." := Cust."Identification No.";
+                VALIDATE("VAT Bus. Posting Group", Cust."VAT Bus. Posting Group");
+                MODIFY;
+            end;
+        }
 
-        //trigger "(Field 4)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD(Status,Status::Open);
-        BilltoCustomerNoChanged := xRec."Bill-to Customer No." <> "Bill-to Customer No.";
-        if BilltoCustomerNoChanged then
-        #4..24
-        Cust.CheckBlockedCustOnDocs(Cust,"Document Type",false,false);
-        Cust.TESTFIELD("Customer Posting Group");
-        PostingSetupMgt.CheckCustPostingGroupReceivablesAccount("Customer Posting Group");
-        CheckCrLimit;
-        "Bill-to Customer Template Code" := '';
-        "Bill-to Name" := Cust.Name;
-        "Bill-to Name 2" := Cust."Name 2";
-        CopyBillToCustomerAddressFieldsFromCustomer(Cust);
-        if not SkipBillToContact then
-          "Bill-to Contact" := Cust.Contact;
-        "Payment Terms Code" := Cust."Payment Terms Code";
-        #36..49
-          "VAT Registration No." := Cust."VAT Registration No.";
-          "Gen. Bus. Posting Group" := Cust."Gen. Bus. Posting Group";
-        end;
-        "Customer Posting Group" := Cust."Customer Posting Group";
-        "Currency Code" := Cust."Currency Code";
-        "Customer Price Group" := Cust."Customer Price Group";
-        #56..97
+        modify("Posting Date")
+        {
+            trigger OnAfterValidate()
+            var
+                SalesSetup: Record "Sales & Receivables Setup";
+            begin
+                SalesSetup.GET;
+                if SalesSetup."Default VAT Date" = SalesSetup."Default VAT Date"::"Posting Date" then
+                    VALIDATE("VAT Date", "Posting Date");
+                if "Posting Date" <> xRec."Posting Date" then
+                    UpdateExciseLabels;
+                MODIFY;
+            end;
+        }
 
-        if (xRec."Bill-to Customer No." <> '') and (xRec."Bill-to Customer No." <> "Bill-to Customer No.") then
-          RecallModifyAddressNotification(GetModifyBillToCustomerAddressNotificationId);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..27
-
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if GUIALLOWED and (CurrFieldNo <> 0) and ("Document Type" <= "Document Type"::Invoice) then begin
-            "Amount Including VAT" := 0;
-            case "Document Type" of
-              "Document Type"::Quote,"Document Type"::Invoice:
-                CustCheckCreditLimit.SalesHeaderCheck(Rec);
-              "Document Type"::Order:
-                begin
-                  if "Bill-to Customer No." <> xRec."Bill-to Customer No." then begin
-                    SalesLine.SETRANGE("Document Type",SalesLine."Document Type"::Order);
-                    SalesLine.SETRANGE("Document No.","No.");
-                    SalesLine.CALCSUMS("Outstanding Amount","Shipped Not Invoiced");
-                    "Amount Including VAT" := SalesLine."Outstanding Amount" + SalesLine."Shipped Not Invoiced";
-                  end;
-                  CustCheckCreditLimit.SalesHeaderCheck(Rec);
+        modify("Customer Posting Group")
+        {
+            trigger OnBeforeValidate()
+            var
+                SalesSetup: Record "Sales & Receivables Setup";
+            begin
+                if (CurrFieldNo = FIELDNO("Customer Posting Group")) and
+                  ("Customer Posting Group" <> xRec."Customer Posting Group")
+                then begin
+                    SalesSetup.GET;
+                    if SalesSetup."Allow Alter Posting Groups" then begin
+                        if not SubstCustPostingGrp.GET(xRec."Customer Posting Group", "Customer Posting Group") then
+                            ERROR(Text46012225, xRec."Customer Posting Group", "Customer Posting Group", SubstCustPostingGrp.TABLECAPTION);
+                    end else
+                        ERROR(Text46012226, FIELDCAPTION("Customer Posting Group"), SalesSetup.FIELDCAPTION("Allow Alter Posting Groups"));
                 end;
             end;
-            CALCFIELDS("Amount Including VAT");
-          end;
-        //NAVE110.0; 001; end
-
-        #28..32
-
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          "VAT Country/Region Code" := Cust."Country/Region Code";
-          "VAT Registration No." := Cust."VAT Registration No.";
-          "Industry Code" := Cust."Industry Code";
-          "Registration No." := Cust."Registration No.";
-          "Identification No." := Cust."Identification No.";
-        end;
-        //NAVE110.0; 001; end
-
-        #33..52
-
-          //NAVBG10.0; 001; begin
-          if LocalizationUsage.UseBulgarianLocalization then
-            VALIDATE( "VAT Bus. Posting Group", Cust."VAT Bus. Posting Group" );
-          //NAVBG10.0; 001; end
-
-        #53..100
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Posting Date"(Field 20).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD("Posting Date");
-        TestNoSeriesDate(
-          "Posting No.","Posting No. Series",
-        #4..11
-        if "Incoming Document Entry No." = 0 then
-          VALIDATE("Document Date","Posting Date");
-
-        if ("Document Type" in ["Document Type"::Invoice,"Document Type"::"Credit Memo"]) and
-           not ("Posting Date" = xRec."Posting Date")
-        then
-        #18..26
-          if DeferralHeadersExist then
-            ConfirmUpdateDeferralDate;
-        SynchronizeAsmHeader;
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..14
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          SalesSetup.GET;
-          if SalesSetup."Default VAT Date" = SalesSetup."Default VAT Date"::"Posting Date" then
-            VALIDATE("VAT Date","Posting Date");
-          if "Posting Date" <> xRec."Posting Date" then
-            UpdateExciseLabels;
-        end;
-        //NAVE110.0; 001; end
-
-        #15..29
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""Customer Posting Group"(Field 31)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if (CurrFieldNo = FIELDNO("Customer Posting Group")) and
-             ("Customer Posting Group" <> xRec."Customer Posting Group")
-          then begin
-            SalesSetup.GET;
-            if SalesSetup."Allow Alter Posting Groups" then begin
-              if not SubstCustPostingGrp.GET(xRec."Customer Posting Group","Customer Posting Group") then
-                ERROR(Text46012225,xRec."Customer Posting Group","Customer Posting Group",SubstCustPostingGrp.TABLECAPTION);
-            end else
-              ERROR(Text46012226,FIELDCAPTION("Customer Posting Group"),SalesSetup.FIELDCAPTION("Allow Alter Posting Groups"));
-          end;
-        //NAVE110.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Prices Including VAT"(Field 35).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD(Status,Status::Open);
-
-        if "Prices Including VAT" <> xRec."Prices Including VAT" then begin
-        #4..13
-          SalesLine.SETRANGE("Document No.","No.");
-          SalesLine.SETFILTER("Unit Price",'<>%1',0);
-          SalesLine.SETFILTER("VAT %",'<>%1',0);
-          if SalesLine.FINDFIRST then begin
-            RecalculatePrice :=
-              CONFIRM(
-        #20..35
-              if not RecalculatePrice then begin
-                SalesLine."VAT Difference" := 0;
-                SalesLine.UpdateAmounts;
-              end else begin
-                VatFactor := 1 + SalesLine."VAT %" / 100;
-                if VatFactor = 0 then
-                  VatFactor := 1;
-                if not "Prices Including VAT" then
-                  VatFactor := 1 / VatFactor;
-                SalesLine."Unit Price" :=
-                  ROUND(SalesLine."Unit Price" * VatFactor,Currency."Unit-Amount Rounding Precision");
-                SalesLine."Line Discount Amount" :=
-                  ROUND(
-        #49..60
-          end;
-          OnAfterChangePricesIncludingVAT(Rec);
-        end;
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..16
-
-          //NAVE110.0; 001; begin
-          if LocalizationUsage.UseEastLocalization then
-            if not ("Calculate Excise" or "Calculate Product Tax") then
-              SalesLine.SETFILTER("VAT %",'',0);
-          //NAVE110.0; 001; end
-
-        #17..38
-
-                  //NAVE110.0; 001; begin
-                  if LocalizationUsage.UseEastLocalization then begin
-                    if (SalesLine."Unit Excise" <> 0) or (SalesLine."Unit Product Tax" <> 0) then begin
-
-                      SalesLine."Unit Price" :=
-                        ROUND(
-                          SalesLine."Unit Price" * (1 + (SalesLine."VAT %" / 100)),
-                          Currency."Unit-Amount Rounding Precision");
-                      if SalesLine.Quantity <> 0 then begin
-                        SalesLine."Line Discount Amount" :=
-                          ROUND(
-                            SalesLine.Quantity * SalesLine."Unit Price" * SalesLine."Line Discount %" / 100,
-                            Currency."Amount Rounding Precision");
-                        SalesLine.VALIDATE("Inv. Discount Amount",
-                          ROUND(
-                            SalesLine."Inv. Discount Amount" * (1 + (SalesLine."VAT %" / 100)),
-                            Currency."Amount Rounding Precision"));
-                      end;
-
-                    end;
-                  end else
-                  //NAVE110.0; 001; end
-                    SalesLine."Unit Price" :=
-                      ROUND(
-                        SalesLine."Unit Price" * (1 + (SalesLine."VAT %" / 100)),
-                        Currency."Unit-Amount Rounding Precision");
-                    if SalesLine.Quantity <> 0 then begin
-                      SalesLine."Line Discount Amount" :=
-                        ROUND(
-                          SalesLine.Quantity * SalesLine."Unit Price" * SalesLine."Line Discount %" / 100,
-                          Currency."Amount Rounding Precision");
-                      SalesLine.VALIDATE("Inv. Discount Amount",
-                        ROUND(
-                          SalesLine."Inv. Discount Amount" * (1 + (SalesLine."VAT %" / 100)),
-                          Currency."Amount Rounding Precision"));
-                    end;
-
-        #39..44
-
-                  //NAVE110.0; 001; begin
-                  if LocalizationUsage.UseEastLocalization then begin
-                    if (SalesLine."VAT %" <> 0) or (SalesLine."Unit Excise" <> 0) or (SalesLine."Unit Product Tax" <> 0) then begin
-
-                      SalesLine."Unit Price" :=
-                        ROUND(
-                          SalesLine."Unit Price" / (1 + (SalesLine."VAT %" / 100)),
-                          Currency."Unit-Amount Rounding Precision");
-                      if SalesLine.Quantity <> 0 then begin
-                        SalesLine."Line Discount Amount" :=
-                          ROUND(
-                            SalesLine.Quantity * SalesLine."Unit Price" * SalesLine."Line Discount %" / 100,
-                            Currency."Amount Rounding Precision");
-                        SalesLine.VALIDATE("Inv. Discount Amount",
-                          ROUND(
-                            SalesLine."Inv. Discount Amount" / (1 + (SalesLine."VAT %" / 100)),
-                            Currency."Amount Rounding Precision"));
-                      end;
-
-                    end;
-                  end else
-                  //NAVE110.0; 001; end
-                    SalesLine."Unit Price" :=
-        #46..63
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Applies-to Doc. No."(Field 53).OnLookup". Please convert manually.
-
-        //trigger  No();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD("Bal. Account No.",'');
-        CustLedgEntry.SetApplyToFilters("Bill-to Customer No.","Applies-to Doc. Type","Applies-to Doc. No.",Amount);
-
-        #4..10
-            "Currency Code",CustLedgEntry."Currency Code",GenJnlLine."Account Type"::Customer,true);
-          "Applies-to Doc. Type" := CustLedgEntry."Document Type";
-          "Applies-to Doc. No." := CustLedgEntry."Document No.";
-        end;
-        CLEAR(ApplyCustEntries);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..13
-
-          //NAVE110.0; 001; begin
-          if LocalizationUsage.UseEastLocalization then
-            if "Applies-to Doc. Type" = "Applies-to Doc. Type"::Invoice then begin
-              "To Invoice No." := "Applies-to Doc. No.";
-              "To Invoice Date" := CustLedgEntry."Posting Date";
-            end else begin
-              "To Invoice No." := '';
-              "To Invoice Date" := 0D;
-            end;
-          //NAVE110.0; 001; end
-
-        end;
-        CLEAR(ApplyCustEntries);
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""EU 3-Party Trade"(Field 75)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if not "EU 3-Party Trade" then
-            "EU 3-Party Intermediate Role" := false;
-        //NAVE110.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Sell-to Customer Name"(Field 79).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if not IdentityManagement.IsInvAppId and ShouldLookForCustomerByName("Sell-to Customer No.") then
-          VALIDATE("Sell-to Customer No.",Customer.GetCustNo("Sell-to Customer Name"));
-        GetShippingTime(FIELDNO("Sell-to Customer Name"));
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..3
-
-        //NAVBG10.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if "Sell-to Customer Name" <> xRec."Sell-to Customer Name" then
+        }
+        modify("EU 3-Party Trade")
+        {
+            trigger OnBeforeValidate()
             begin
-              ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-              ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-              ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type","Document Type");
-              if ExciseTaxDoc.FINDFIRST then begin
-                ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Sell-to Customer Name","Sell-to Customer Name");
-                ExciseTaxDoc.MODIFY;
-              end;
-          end;
-        //NAVBG10.0; 001; end
-        */
-        //end;
+                if not "EU 3-Party Trade" then
+                    "EU 3-Party Intermediate Role" := false;
+            end;
+        }
 
+        modify("Sell-to Customer Name")
+        {
+            trigger OnAfterValidate()
+            begin
+                if "Sell-to Customer Name" <> xRec."Sell-to Customer Name" then begin
+                    ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+                    ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+                    ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", "Document Type");
+                    if ExciseTaxDoc.FINDFIRST then begin
+                        ExciseTaxDoc.VALIDATE(ExciseTaxDoc."Sell-to Customer Name", "Sell-to Customer Name");
+                        ExciseTaxDoc.MODIFY;
+                    end;
+                end;
+            end;
+        }
 
-        //Unsupported feature: CodeInsertion on ""Bill-to Country/Region Code"(Field 87).OnValidate". Please convert manually.
+        modify("Bill-to Country/Region Code")
+        {
+            trigger OnAfterValidate()
+            var
+                CompanyInfo: Record "Company Information";
+            begin
+                CompanyInfo.GET;
+                Export := not ("Bill-to Country/Region Code" in ['', CompanyInfo."Country/Region Code"]);
+                VALIDATE("Calculate Excise", not Export);
+                VALIDATE("Calculate Product Tax", not Export);
+                MODIFY;
+            end;
+        }
 
-        //trigger (Variable: +++++++++++)();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        */
-        //end;
+        modify("Document Date")
+        {
+            trigger OnBeforeValidate()
+            var
+                SalesSetup: Record "Sales & Receivables Setup";
+            begin
+                SalesSetup.GET;
+                if SalesSetup."Default VAT Date" = SalesSetup."Default VAT Date"::"Document Date" then
+                    VALIDATE("VAT Date", "Document Date");
+            end;
+        }
+        modify("VAT Bus. Posting Group")
+        {
+            trigger OnAfterValidate()
+            begin
+                if VATBusPostingGroup.GET("VAT Bus. Posting Group") then begin
+                    "Unrealized VAT" := VATBusPostingGroup."Unrealized VAT";
+                    MODIFY;
+                end;
+            end;
+        }
 
+        modify("Bill-to Contact No.")
+        {
+            trigger OnAfterValidate()
+            var
+                Cont: Record Contact;
+                ContactBusinessRelationFound: Boolean;
+                ContBusinessRelation: Record "Contact Business Relation";
+                SearchContact: Record Contact;
+            begin
+                if not Cont.GET("Bill-to Contact No.") then begin
+                    "Bill-to Contact" := '';
+                    exit;
+                end;
+                if Cont.Type = Cont.Type::Person then
+                    ContactBusinessRelationFound := ContBusinessRelation.FindByContact(ContBusinessRelation."Link to Table"::Customer.AsInteger(), Cont."No.");
+                if not ContactBusinessRelationFound then
+                    ContactBusinessRelationFound :=
+                      ContBusinessRelation.FindByContact(ContBusinessRelation."Link to Table"::Customer.AsInteger(), Cont."Company No.");
+                if not ContactBusinessRelationFound then begin
+                    if "Document Type" = "Document Type"::Quote then begin
+                        if Cont."Company No." <> '' then
+                            SearchContact.GET(Cont."Company No.")
+                        else
+                            SearchContact.GET(Cont."No.");
+                        "Registration No." := SearchContact."Registration No.";
+                        "Registration No. 2" := SearchContact."Registration No. 2";
+                        MODIFY;
+                    end;
+                end;
+            end;
+        }
+        modify("Location Code")
+        {
+            trigger OnAfterValidate()
+            var
+                Location: Record Location;
+            begin
+                if "Location Code" <> '' then
+                    if Location.GET("Location Code") then begin
+                        Area := Location.Area;
+                        MODIFY;
+                    end;
+            end;
+        }
+        modify("Responsibility Center")
+        {
+            trigger OnAfterValidate()
+            var
+                Location: Record Location;
+            begin
+                if "Location Code" <> '' then
+                    if Location.GET("Location Code") then begin
+                        Area := Location.Area;
+                        MODIFY;
+                    end;
+            end;
+        }
 
-        //Unsupported feature: CodeModification on ""Bill-to Country/Region Code"(Field 87).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        ModifyBillToCustomerAddress;
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-         ModifyBillToCustomerAddress;
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          Export := not ("Bill-to Country/Region Code" in ['',CompanyInfo."Country/Region Code"]);
-
-          VALIDATE("Calculate Excise",not Export);
-          VALIDATE("Calculate Product Tax",not Export);
-        end;
-        //NAVE110.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Document Date"(Field 99).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if xRec."Document Date" <> "Document Date" then
-          UpdateDocumentDate := true;
-        VALIDATE("Payment Terms Code");
-        VALIDATE("Prepmt. Payment Terms Code");
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..4
-
-        //NAVE110.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          SalesSetup.GET;
-          if SalesSetup."Default VAT Date" = SalesSetup."Default VAT Date"::"Document Date" then
-            VALIDATE("VAT Date","Document Date");
-        end;
-        //NAVE110.0; 001; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""VAT Bus. Posting Group"(Field 116).OnValidate". Please convert manually.
-
-        //trigger (Variable: +++++++)();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""VAT Bus. Posting Group"(Field 116).OnValidate". Please convert manually.
-
-        //trigger  Posting Group"(Field 116)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD(Status,Status::Open);
-        if xRec."VAT Bus. Posting Group" <> "VAT Bus. Posting Group" then
-          RecreateSalesLines(FIELDCAPTION("VAT Bus. Posting Group"));
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..3
-
-        //NAVBG10.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if VATBusPostingGroup.GET( "VAT Bus. Posting Group" ) then
-            "Unrealized VAT" := VATBusPostingGroup."Unrealized VAT";
-        //NAVBG10.0; 001; end
-        */
-        //end;
         field(46015505; "Identification No."; Text[13])
         {
             Caption = 'Identification No.';
@@ -701,9 +407,9 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
             trigger OnValidate();
             var
                 lRecSalesLine: Record "Sales Line";
+                SalesSetup: Record "Sales & Receivables Setup";
+                NoSeriesMgt: Codeunit NoSeriesManagement;
             begin
-                //TODO
-                /*
                 if "Excise Tax Document No." <> xRec."Excise Tax Document No." then begin
                     SalesSetup.GET;
                     NoSeriesMgt.TestManual(SalesSetup."Excise Tax Document Nos.");
@@ -711,7 +417,6 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
                     ExciseTaxDoc.ValidateWithSalesValues(Rec);
                 end else
                     ExciseTaxDoc.ValidateWithSalesValues(Rec);
-                */
             end;
         }
         field(46015543; "Excise Charge Ground Code"; Code[20])
@@ -864,15 +569,14 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
             Description = 'NAVE110.0,001';
 
             trigger OnValidate();
+            var
+                GLSetup: Record "General Ledger Setup";
             begin
-                //TODO
-                /*
                 GLSetup.GET;
                 if not GLSetup."Use VAT Date" then
                     TESTFIELD("VAT Date", "Posting Date");
                 if "VAT Date" <> xRec."VAT Date" then
                     UpdateSalesLines(FIELDCAPTION("VAT Date"), false);
-                */
             end;
         }
         field(46015611; "Postponed VAT"; Boolean)
@@ -895,6 +599,7 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
             trigger OnValidate();
             var
                 BankAcc: Record "Bank Account";
+                CompanyInfo: Record "Company Information";
             begin
                 if BankAcc.GET("Bank No.") then begin
                     "Bank Name" := BankAcc.Name;
@@ -903,15 +608,12 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
                     IBAN := BankAcc.IBAN;
                     "Bank Code" := BankAcc."Bank Code";
                 end else begin
-                    //TODO
-                    /*
-                      CompanyInfo.GET;
-                      "Bank Name" := CompanyInfo."Bank Name";
-                      "Bank Account No." := CompanyInfo."Bank Account No.";
-                      "Bank Branch No." := CompanyInfo."Bank Branch No.";
-                      IBAN := CompanyInfo.IBAN;
-                      "Bank Code" := CompanyInfo."Bank Code";
-                    */
+                    CompanyInfo.GET;
+                    "Bank Name" := CompanyInfo."Bank Name";
+                    "Bank Account No." := CompanyInfo."Bank Account No.";
+                    "Bank Branch No." := CompanyInfo."Bank Branch No.";
+                    IBAN := CompanyInfo.IBAN;
+                    "Bank Code" := CompanyInfo."Bank Code";
                 end;
             end;
         }
@@ -956,11 +658,9 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
 
             trigger OnValidate();
             begin
-                //TODO
-                /*
                 if "Posting Desc. Code" <> '' then
                     "Posting Description" := GetPostingDescription(Rec);
-                */
+
             end;
         }
         field(46015631; "Bank Branch No."; Text[20])
@@ -974,27 +674,22 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
             Description = 'NAVE110.0,001';
 
             trigger OnValidate();
+            var
+                CompanyInfo: Record "Company Information";
             begin
-                //TODO                
-                //CompanyInfo.CheckIBAN(IBAN);
+                CompanyInfo.CheckIBAN(IBAN);
             end;
         }
         field(46015636; "Delivery Person Name"; Text[30])
         {
             Caption = 'Delivery Person Name';
             Description = 'NAVE110.0,001';
-            //This property is currently not supported
-            //TestTableRelation = true;
-            //TODO
-            //ValidateTableRelation = true;
         }
         field(46015637; "Identity Card No."; Code[20])
         {
             Caption = 'Identity Card No.';
             Description = 'NAVE110.0,001';
             TableRelation = "Delivery Person";
-            //This property is currently not supported
-            //TestTableRelation = false;
             ValidateTableRelation = false;
 
             trigger OnValidate();
@@ -1044,78 +739,150 @@ tableextension 46015561 "Sales Header Extension" extends "Sales Header"
             Description = 'NAVBG10.0,001';
         }
     }
-
-
-    //Unsupported feature: CodeModification on "OnInsert". Please convert manually.
-
-    //trigger OnInsert();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    InitInsert;
-    InsertMode := true;
-
-    SetSellToCustomerFromFilter;
-
-    if GetFilterContNo <> '' then
-      VALIDATE("Sell-to Contact No.",GetFilterContNo);
-
-    if "Salesperson Code" = '' then
-      SetDefaultSalesperson;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..8
-    //NAVE110.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      VALIDATE("Posting Desc. Code",SalesSetup."Posting Desc. Code");
-    //NAVE110.0; 001; end
-
-    if "Salesperson Code" = '' then
-      SetDefaultSalesperson;
-    */
-    //end;
-
-
-    //Unsupported feature: CodeInsertion on "OnModify". Please convert manually.
-
-    //trigger OnModify();
-    //Parameters and return type have not been exported.
-    //begin
-    /*
-    //NAVE110.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      VALIDATE("Posting Desc. Code");
-    //NAVE110.0; 001; end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         "+++++++++++": Integer;
         Export: Boolean;
-
-    var
         "+++++++": Integer;
         VATBusPostingGroup: Record "VAT Business Posting Group";
-
-    var
         PostedSeriesNo: Code[20];
-
-    var
         SubstCustPostingGrp: Record "Subst. Customer Posting Group";
         DeliveryPerson: Record "Delivery Person";
+        SalesLine: Record "Sales Line";
         CurrencyRateEntered: Boolean;
         Text46012225: Label 'You cannot change the %1 to %2 because %3 has not been filled in.';
         Text46012226: Label 'You cannot change %1 until %2 will be checked in setup.';
         ExciseTaxDoc: Record "Excise Tax Document";
+
+    trigger OnAfterInsert()
+    var
+        SalesSetup: Record "Sales & Receivables Setup";
+    begin
+        SalesSetup.GET;
+        VALIDATE("Posting Desc. Code", SalesSetup."Posting Desc. Code");
+        MODIFY;
+    end;
+
+    trigger OnBeforeModify()
+    begin
+        VALIDATE("Posting Desc. Code");
+    end;
+
+    procedure GetPostingDescription(SalesHeader: Record "Sales Header"): Text[50];
+    var
+        PostingDesc: Record "Posting Description";
+        RecordReference: RecordRef;
+    begin
+        if PostingDesc.GET(SalesHeader."Posting Desc. Code") then begin
+            PostingDesc.TESTFIELD(Type, PostingDesc.Type::"Sales Document");
+            RecordReference.OPEN(DATABASE::"Sales Header");
+            RecordReference.GETTABLE(SalesHeader);
+            exit(PostingDesc.ParsePostDescString(PostingDesc, RecordReference));
+        end;
+    end;
+
+    procedure IsIntrastatTransaction() IsIntrastat: Boolean;
+    var
+        CountryRegion: Record "Country/Region";
+    begin
+        exit(CountryRegion.IsIntrastat("VAT Country/Region Code", false));
+    END;
+
+    procedure UpdateBankInfo();
+    var
+        RespCenter: Record "Responsibility Center";
+        CompanyInfo: Record "Company Information";
+    begin
+        if RespCenter.GET("Responsibility Center") then begin
+            "Bank Name" := RespCenter."Bank Name";
+            "Bank Account No." := RespCenter."Bank Account No.";
+            "Bank Branch No." := RespCenter."Bank Branch No.";
+            IBAN := RespCenter.IBAN;
+        end else begin
+            CompanyInfo.GET;
+            "Bank Name" := CompanyInfo."Bank Name";
+            "Bank Account No." := CompanyInfo."Bank Account No.";
+            "Bank Branch No." := CompanyInfo."Bank Branch No.";
+            IBAN := CompanyInfo.IBAN;
+        end;
+    end;
+
+    procedure getAmtInclDisc(InclVat: Boolean): Decimal;
+    var
+        TempSalesLine: Record "Sales Line" temporary;
+        TotalSalesLine: Record "Sales Line";
+        TotalSalesLineLCY: Record "Sales Line";
+        TempVATAmountLine: Record "VAT Amount Line" temporary;
+        TotalAmount1: Decimal;
+        TotalAmount2: Decimal;
+        VATAmount: Decimal;
+        VATAmountText: Text[30];
+        ProfitLCY: Decimal;
+        ProfitPct: Decimal;
+        dateModified: Boolean;
+        TotalAdjCostLCY: Decimal;
+        SalesPost: Codeunit "Sales-Post";
+    begin
+        dateModified := false;
+        if Rec."Posting Date" = 0D then begin
+            dateModified := true;
+            Rec."Posting Date" := WORKDATE;
+        end;
+
+        CLEAR(SalesLine);
+        CLEAR(TotalSalesLine);
+        CLEAR(TotalSalesLineLCY);
+        CLEAR(SalesPost);
+
+        TotalAdjCostLCY := 0;
+        SalesPost.GetSalesLines(Rec, TempSalesLine, 0);
+        CLEAR(SalesPost);
+        SalesPost.SumSalesLinesTemp(
+          Rec, TempSalesLine, 0, TotalSalesLine, TotalSalesLineLCY,
+          VATAmount, VATAmountText, ProfitLCY, ProfitPct, TotalAdjCostLCY);
+
+        if "Prices Including VAT" then begin
+            TotalAmount2 := TotalSalesLine.Amount;
+            TotalAmount1 := TotalSalesLine."Line Amount" - TotalSalesLine."Inv. Discount Amount";
+        end else begin
+            TotalAmount1 := TotalSalesLine.Amount;
+            TotalAmount2 := TotalSalesLine."Amount Including VAT";
+        end;
+
+        SalesLine.CalcVATAmountLines(0, Rec, TempSalesLine, TempVATAmountLine);
+        TempVATAmountLine.MODIFYALL(Modified, false);
+        TempVATAmountLine.CALCSUMS("Amount Including VAT");
+
+        if dateModified then begin
+            Rec."Posting Date" := 0D;
+        end;
+
+        if InclVat then
+            exit(TempVATAmountLine."Amount Including VAT")
+        else
+            exit(TotalSalesLine.Amount);
+    end;
+
+    procedure UpdateExciseLabels();
+    begin
+        if SalesLinesExist then
+            SalesLine.FINDFIRST;
+        repeat
+            SalesLine.UpdateExciseLabel("Posting Date");
+        until SalesLine.NEXT = 0;
+    end;
+
+    procedure FindSalesLine(pSaleHeader: Record "Sales Header"): Boolean;
+    var
+        lRecSalesLines: Record "Sales Line";
+    begin
+        lRecSalesLines.RESET;
+        lRecSalesLines.SETRANGE(lRecSalesLines."Document Type", pSaleHeader."Document Type");
+        lRecSalesLines.SETRANGE(lRecSalesLines."Document No.", pSaleHeader."No.");
+        lRecSalesLines.SETRANGE(lRecSalesLines."Excise Item", true);
+        if lRecSalesLines.FIND('-') then
+            exit(true)
+        else
+            exit(false);
+    end;
 }
 

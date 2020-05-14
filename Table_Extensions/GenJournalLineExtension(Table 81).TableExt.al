@@ -189,6 +189,68 @@ tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line
                       STRSUBSTNO(FieldIsNotEmptyErr, FIELDCAPTION("Recipient Bank Account"), FIELDCAPTION("Creditor No.")));
             end;
         }
+        modify("Bill-to/Pay-to No.")
+        {
+            trigger OnAfterValidate()
+            var
+                Cust: Record Customer;
+                Vend: Record Vendor;
+            begin
+                IF "Bill-to/Pay-to No." = '' THEN
+                    "Registration No." := '';
+                CASE TRUE OF
+                    "VAT Protocol" AND ("Bal. Gen. Posting Type" = "Bal. Gen. Posting Type"::" ") OR
+                    ("Account Type" = "Account Type"::Customer) OR ("Bal. Account Type" = "Bal. Account Type"::Customer):
+                        BEGIN
+                            Cust.GET("Bill-to/Pay-to No.");
+                            "Country/Region Code" := Cust."Country/Region Code";
+                            "VAT Registration No." := Cust."VAT Registration No.";
+                            "Registration No." := Cust."Registration No.";
+                        END;
+
+                    "VAT Protocol" AND ("Bal. Gen. Posting Type" = "Bal. Gen. Posting Type"::Purchase) OR
+                    ("Account Type" = "Account Type"::Vendor) OR ("Bal. Account Type" = "Bal. Account Type"::Vendor):
+                        BEGIN
+                            Vend.GET("Bill-to/Pay-to No.");
+                            "Country/Region Code" := Vend."Country/Region Code";
+                            "VAT Registration No." := Vend."VAT Registration No.";
+                            "Registration No." := Vend."Registration No.";
+                        END;
+                END;
+                MODIFY;
+            end;
+        }
+        modify("Sell-to/Buy-from No.")
+        {
+            trigger OnAfterValidate()
+            var
+                Cust: Record Customer;
+                Vend: Record Vendor;
+            begin
+                IF "Bill-to/Pay-to No." = '' THEN
+                    "Registration No." := '';
+                CASE TRUE OF
+                    "VAT Protocol" AND ("Bal. Gen. Posting Type" = "Bal. Gen. Posting Type"::" ") OR
+                    ("Account Type" = "Account Type"::Customer) OR ("Bal. Account Type" = "Bal. Account Type"::Customer):
+                        BEGIN
+                            Cust.GET("Bill-to/Pay-to No.");
+                            "Country/Region Code" := Cust."Country/Region Code";
+                            "VAT Registration No." := Cust."VAT Registration No.";
+                            "Registration No." := Cust."Registration No.";
+                        END;
+
+                    "VAT Protocol" AND ("Bal. Gen. Posting Type" = "Bal. Gen. Posting Type"::Purchase) OR
+                    ("Account Type" = "Account Type"::Vendor) OR ("Bal. Account Type" = "Bal. Account Type"::Vendor):
+                        BEGIN
+                            Vend.GET("Bill-to/Pay-to No.");
+                            "Country/Region Code" := Vend."Country/Region Code";
+                            "VAT Registration No." := Vend."VAT Registration No.";
+                            "Registration No." := Vend."Registration No.";
+                        END;
+                END;
+                MODIFY;
+            end;
+        }
 
         field(46015506; "Debit Memo"; Boolean)
         {

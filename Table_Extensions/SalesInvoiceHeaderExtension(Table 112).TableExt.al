@@ -1,7 +1,12 @@
 tableextension 46015509 "Sales Invoice Header Extension" extends "Sales Invoice Header"
 {
     // version NAVW111.00.00.20783,NAVE111.0,NAVBG11.0
-    //TODO
+    //TODO:
+    //trigger OnBeforeDelete()
+    //PROCEDURE SendProfile()
+    //PROCEDURE PrintRecords()
+    //PROCEDURE Voiding
+
     fields
     {
         field(46015505; "Identification No."; Text[13])
@@ -363,69 +368,63 @@ tableextension 46015509 "Sales Invoice Header Extension" extends "Sales Invoice 
         }
     }
 
-
-    //Unsupported feature: CodeInsertion on "OnDelete". Please convert manually.
-
-    //trigger (Variable: ExciseTaxDoc)();
-    //Parameters and return type have not been exported.
-    //begin
-    /*
-    */
-    //end;
-
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    PostSalesDelete.IsDocumentDeletionAllowed("Posting Date");
-    TESTFIELD("No. Printed");
-    LOCKTABLE;
-    #4..9
-    ApprovalsMgmt.DeletePostedApprovalEntries(RECORDID);
-    PostedDeferralHeader.DeleteForDoc(DeferralUtilities.GetSalesDeferralDocType,'','',
-      SalesCommentLine."Document Type"::"Posted Invoice","No.");
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then
-      PostSalesDelete.CheckIfSalesDocDeleteAllowed("Posting Date")
-    else
-    //NAVE111.0; 001; end
-    #1..12
-
-    //NAVBG11.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      ExciseTaxDoc.SETCURRENTKEY("Document Type","Corresponding Doc. No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.","No.");
-      ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type",ExciseTaxDoc."Document Type"::"Posted Sales Invoice");
-      ExciseTaxDoc.DELETEALL;
-    end;
-    //NAVBG11.0; 001 end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         ExciseTaxDoc: Record "Excise Tax Document";
-
-    var
         Text46012125: Label 'The purpose of this voiding is to show correctly the voided document in VAT ledgers in accordance with Bulgarian law. The voiding does not create any reversed entries. In order to void the entries a credit memo must be posted. Do you want to continue?';
         Text46012126: Label 'The document is already voided.';
         Text46012127: Label 'Document %1 was voided.';
+
+    trigger OnBeforeDelete()
+    var
+        PostSalesDelete: Codeunit "PostSales-Delete";
+    begin
+        //TODO: After adding the procedure
+        //PostSalesDelete.CheckIfSalesDocDeleteAllowed("Posting Date")
+    end;
+
+    trigger OnDelete()
+    begin
+        ExciseTaxDoc.SETCURRENTKEY("Document Type", "Corresponding Doc. No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Corresponding Doc. No.", "No.");
+        ExciseTaxDoc.SETRANGE(ExciseTaxDoc."Document Type", ExciseTaxDoc."Document Type"::"Posted Sales Invoice");
+        ExciseTaxDoc.DELETEALL;
+    end;
+
+    procedure Voiding();
+    var
+        VATEntry: Record "VAT Entry";
+    //TODO: after adding the page
+    //VoidDate : Page "Void Date Input";
+    begin
+        if Void then
+            ERROR(Text46012126);
+        //TODO: After Adding the page
+        /*
+          if VoidDate.RUNMODAL = ACTION::OK then begin
+            VoidDate.GetVoidDate("Void Date");
+            if "Void Date" = 0D then
+              exit;
+          end;
+          */
+
+        if not CONFIRM(Text46012125) then
+            exit;
+
+        VATEntry.RESET;
+        VATEntry.SETRANGE(Type, VATEntry.Type::Sale);
+        VATEntry.SETRANGE("Document No.", "No.");
+        VATEntry.SETRANGE("Posting Date", "Posting Date");
+        if VATEntry.FIND('-') then
+            repeat
+                VATEntry.Void := true;
+                VATEntry."Void Date" := "Void Date";
+                VATEntry.MODIFY;
+            until VATEntry.NEXT = 0;
+
+        Void := true;
+        MODIFY;
+
+        MESSAGE(Text46012127, "No.");
+    end;
 }
 

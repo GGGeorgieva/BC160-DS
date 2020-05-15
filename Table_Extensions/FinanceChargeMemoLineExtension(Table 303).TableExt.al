@@ -97,40 +97,6 @@ tableextension 46015550 "Fin. Ch. Memo Line Extension" extends "Finance Charge M
         end;
     end;
 
-
-    //Unsupported feature: CodeModification on "OnDelete". Please convert manually.
-
-    //trigger OnDelete();
-    //Parameters and return type have not been exported.
-    //>>>> ORIGINAL CODE:
-    //begin
-    /*
-    FinChrgMemoLine.SETRANGE("Finance Charge Memo No.","Finance Charge Memo No.");
-    FinChrgMemoLine.SETRANGE("Attached to Line No.","Line No.");
-    FinChrgMemoLine.DELETEALL;
-    */
-    //end;
-    //>>>> MODIFIED CODE:
-    //begin
-    /*
-    #1..3
-
-    //NAVE111.0; 001; begin
-    if LocalizationUsage.UseEastLocalization then begin
-      DtldFinChargeMemoLine.SETRANGE("Finance Charge Memo No.","Finance Charge Memo No.");
-      DtldFinChargeMemoLine.SETRANGE("Fin. Charge. Memo Line No.","Line No.");
-      DtldFinChargeMemoLine.DELETEALL;
-    end;
-    //NAVE111.0; 001; end
-    */
-    //end;
-
-    //Unsupported feature: InsertAfter on "Documentation". Please convert manually.
-
-
-    //Unsupported feature: PropertyChange. Please convert manually.
-
-
     var
         DtldFinChargeMemoLine: Record "Detailed Fin. Charge Memo Line";
         SalesSetup: Record "Sales & Receivables Setup";

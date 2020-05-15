@@ -142,4 +142,36 @@ codeunit 46015809 "Gen. Jnl. Line Subscribers"
         GenJournalLine."Identification No." := Vendor."Identification No.";
         GenJournalLine."Bill-to/Pay-to Name" := Vendor.Name;
     end;
+
+    [EventSubscriber(ObjectType::Table, Database::"Gen. Journal Line", 'OnValidateVATProdPostingGroupOnBeforeVATCalculationCheck', '', true, true)]
+    local procedure ValidateVatProdPostGroup(var GenJournalLine: Record "Gen. Journal Line"; var VATPostingSetup: Record "VAT Posting Setup"; var IsHandled: Boolean)
+    begin
+        if GenJournalLine."Gen. Posting Type" <> 0 then begin
+            if not VATPostingSetup.GET(GenJournalLine."VAT Bus. Posting Group", GenJournalLine."VAT Prod. Posting Group") then
+                VATPostingSetup.INIT;
+            GenJournalLine."VAT Calculation Type" := VATPostingSetup."VAT Calculation Type";
+            case GenJournalLine."VAT Calculation Type" of
+                GenJournalLine."VAT Calculation Type"::"Normal VAT":
+                    GenJournalLine."VAT %" := VATPostingSetup."VAT %";
+                GenJournalLine."VAT Calculation Type"::"Full VAT":
+                    case GenJournalLine."Gen. Posting Type" of
+                        GenJournalLine."Gen. Posting Type"::Sale:
+                            //NAVE111.0; 001; begin
+                            if not GenJournalLine."VAT Protocol" then
+                                GenJournalLine.TESTFIELD("Account No.", VATPostingSetup.GetSalesAccount(false));
+                        GenJournalLine."Gen. Posting Type"::Purchase:
+                            //NAVE111.0; 001; begin
+                            if not GenJournalLine."VAT Protocol" then
+                                GenJournalLine.TESTFIELD("Account No.", VATPostingSetup.GetPurchAccount(false));
+                    end;
+            end;
+        end;
+        GenJournalLine.VALIDATE("VAT %");
+
+        if GenJournalLine.JobTaskIsSet then begin
+            GenJournalLine.CreateTempJobJnlLine;
+            GenJournalLine.UpdatePricesFromJobJnlLine;
+        end;
+        IsHandled := true;
+    end;
 }

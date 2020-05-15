@@ -1,8 +1,6 @@
 tableextension 46015603 "Gen. Journal Line Extension" extends "Gen. Journal Line"
 {
-    // version NAVW111.00.00.27667,NAVE111.0,NAVBG11.0,DS11.00
-    //TODO:
-    //VAT Prod. Posting Group - OnValidate
+    // version NAVW111.00.00.27667,NAVE111.0,NAVBG11.0,DS11.00    
 
     fields
     {

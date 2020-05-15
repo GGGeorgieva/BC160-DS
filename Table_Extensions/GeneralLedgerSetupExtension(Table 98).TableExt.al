@@ -1,58 +1,35 @@
 tableextension 46015613 "Gen. Ledg. Setup Extension" extends "General Ledger Setup"
 {
     // version NAVW111.00.00.28629,NAVE111.0,DS11.00
-
-    //TODO
-    //"Additional Reporting Currency" - OnValidate
-
     fields
     {
 
-        //Unsupported feature: CodeModification on ""Additional Reporting Currency"(Field 68).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if ("Additional Reporting Currency" <> xRec."Additional Reporting Currency") and
-           ("Additional Reporting Currency" <> '')
-        then begin
-        #4..14
-           AdjAddReportingCurr.IsExecuted
-        then
-          DeleteAnalysisView;
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization and ("Additional Reporting Currency" <> xRec."Additional Reporting Currency") then begin
-          if "Additional Reporting Currency" = '' then
-            OK :=
-              CONFIRM(
-                Text005 +
-                Text006 +
-                Text007,false)
-          else
-            OK :=
-              CONFIRM(
-                Text008 +
-                Text010 +
-                Text011 +
-                Text020 +
-                Text013,false,AnalysisView.TABLECAPTION);
-          if not OK then begin
-            "Additional Reporting Currency" := xRec."Additional Reporting Currency";
-            exit;
-          end;
-        end;
-        //NAVE111.0; 001; end
-
-        #1..17
-        */
-        //end;
+        modify("Additional Reporting Currency")
+        {
+            trigger OnBeforeValidate()
+            var
+                AnalysisView: Record "Analysis View";
+            begin
+                if "Additional Reporting Currency" = '' then
+                    OK :=
+                        CONFIRM(
+                        Text005 +
+                        Text006 +
+                        Text007, false)
+                else
+                    OK :=
+                        CONFIRM(
+                        Text008 +
+                        Text010 +
+                        Text011 +
+                        Text020 +
+                        Text013, false, AnalysisView.TABLECAPTION);
+                if not OK then begin
+                    "Additional Reporting Currency" := xRec."Additional Reporting Currency";
+                    exit;
+                end;
+            end;
+        }
         field(46015505; "VAT Protocol Nos."; Code[10])
         {
             Caption = 'VAT Protocol Nos.';

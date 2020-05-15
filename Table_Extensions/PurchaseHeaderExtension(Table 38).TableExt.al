@@ -7,193 +7,151 @@ tableextension 46015562 "Purchase Header Extension" extends "Purchase Header"
     fields
     {
 
-        //Unsupported feature: CodeModification on ""Buy-from Vendor No."(Field 2).OnValidate". Please convert manually.
+        modify("Buy-from Vendor No.")
+        {
+            trigger OnAfterValidate()
+            var
+                GeneralLedgerSetup: Record "General Ledger Setup";
+                Vend: Record Vendor;
+            begin
+                //NAVE111.0; 001; begin
+                GeneralLedgerSetup.Get();
+                Vend.Get("Buy-from Vendor No.");
+                if GeneralLedgerSetup."East Localization" then begin
+                    "Registration No." := Vend."Registration No.";
+                    "Registration No. 2" := Vend."Registration No. 2";
+                    "Identification No." := Vend."Identification No.";
+                    VALIDATE("Transaction Type", Vend."Transaction Type");
+                    VALIDATE("Transaction Specification", Vend."Transaction Specification");
+                    VALIDATE("Transport Method", Vend."Transport Method");
+                end;
+                if GeneralLedgerSetup."Bulgarian Localization" then
+                    VALIDATE("VAT Bus. Posting Group", Vend."VAT Bus. Posting Group");
+                //NAVBG11.0; 001; end
+            end;
+        }
 
-        //trigger "(Field 2)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        if "No." = '' then
-          InitRecord;
-        TESTFIELD(Status,Status::Open);
-        #4..37
-        "Tax Liable" := Vend."Tax Liable";
-        "VAT Country/Region Code" := Vend."Country/Region Code";
-        "VAT Registration No." := Vend."VAT Registration No.";
-        VALIDATE("Lead Time Calculation",Vend."Lead Time Calculation");
-        "Responsibility Center" := UserSetupMgt.GetRespCenter(1,Vend."Responsibility Center");
-        ValidateEmptySellToCustomerAndLocation;
-        #44..83
+        modify("Pay-to Vendor No.")
+        {
+            trigger OnAfterValidate()
+            var
+                GeneralLedgerSetup: Record "General Ledger Setup";
+                SADHeader: Record "Import SAD Header";
+                Vend: Record Vendor;
+            begin
+                //NAVE111.0; 001; begin
+                GeneralLedgerSetup.Get();
+                Vend.Get("Pay-to Vendor No.");
+                if GeneralLedgerSetup."East Localization" then begin
+                    if ("SAD No." <> '') then begin
+                        SADHeader.GET("SAD No.");
+                        if (SADHeader."Vendor No." <> '') and (SADHeader."Vendor No." <> "Pay-to Vendor No.") then
+                            FIELDERROR("Pay-to Vendor No.");
+                    end;
+                    "VAT Country/Region Code" := Vend."Country/Region Code";
+                    "Industry Code" := Vend."Industry Code";
+                    "Registration No." := Vend."Registration No.";
+                    "Registration No. 2" := Vend."Registration No. 2";
+                    "Identification No." := Vend."Identification No.";
+                end;
+                //NAVE111.0; 001; end
+            end;
+        }
 
-        if (xRec."Buy-from Vendor No." <> '') and (xRec."Buy-from Vendor No." <> "Buy-from Vendor No.") then
-          RecallModifyAddressNotification(GetModifyVendorAddressNotificationId);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..40
+        modify("Posting Date")
+        {
+            trigger OnAfterValidate()
+            var
+                GeneralLedgerSetup: Record "General Ledger Setup";
+                PurchSetup: Record "Purchases & Payables Setup";
+            begin
+                //NAVE111.0; 001; begin
+                GeneralledgerSetup.Get();
+                if GeneralLedgerSetup."East Localization" then begin
+                    PurchSetup.GET;
+                    if PurchSetup."Default VAT Date" = PurchSetup."Default VAT Date"::"Posting Date" then
+                        VALIDATE("VAT Date", "Posting Date");
+                    //if "Posting Date" <> xRec."Posting Date" then
+                    //UpdateExciseLabels();
+                    ////NAVBG11.0; 001; entire function
+                    //IF PurchLinesExist THEN
+                    //  PurchLine.FINDFIRST;
+                    //REPEAT
+                    ////PurchLine.UpdateExciseLabel("Posting Date");
+                    //UNTIL PurchLine.NEXT = 0;
+                end;
+                //NAVE111.0; 001; end
+            end;
+        }
 
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          "Registration No." := Vend."Registration No.";
-          "Registration No. 2" := Vend."Registration No. 2";
-          "Identification No." := Vend."Identification No.";
-        end;
-        //NAVE111.0; 001; end
+        modify("Vendor Posting Group")
+        {
+            trigger OnAfterValidate()
+            var
+                GeneralLedgerSetup: Record "General Ledger Setup";
+                PurchSetup: Record "Purchases & Payables Setup";
+            begin
 
-        #41..86
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          VALIDATE("Transaction Type",Vend."Transaction Type");
-          VALIDATE("Transaction Specification",Vend."Transaction Specification");
-          VALIDATE("Transport Method",Vend."Transport Method");
-        end;
-        //NAVE111.0; 001; end
+                //NAVE111.0; 001; begin
+                GeneralLedgerSetup.get();
+                if (CurrFieldNo = FIELDNO("Vendor Posting Group")) and
+                  ("Vendor Posting Group" <> xRec."Vendor Posting Group") and
+                  GeneralLedgerSetup."East Localization"
+                then begin
 
-        //NAVBG11.0; 001; begin
-        if LocalizationUsage.UseBulgarianLocalization then
-          VALIDATE( "VAT Bus. Posting Group", Vend."VAT Bus. Posting Group" );
-        //NAVBG11.0; 001; end
-        */
-        //end;
+                    PurchSetup.GET();
+                    if PurchSetup."Allow Alter Posting Groups" and not SubstVendPostingGrp.GET(xRec."Vendor Posting Group", "Vendor Posting Group") then
+                        ERROR(Text46012225, xRec."Vendor Posting Group", "Vendor Posting Group", SubstVendPostingGrp.TABLECAPTION);
+                    if not PurchSetup."Allow Alter Posting Groups" then
+                        ERROR(Text46012226, FIELDCAPTION("Vendor Posting Group"), PurchSetup.FIELDCAPTION("Allow Alter Posting Groups"));
+                end;
 
+            end;
+        }
 
-        //Unsupported feature: CodeModification on ""Pay-to Vendor No."(Field 4).OnValidate". Please convert manually.
+        modify("Currency Code")
+        {
+            trigger OnAfterValidate()
+            var
+                GeneralLedgerSetup: Record "General Ledger Setup";
+                SADHeader: Record "Import SAD Header";
+                Vend: Record Vendor;
+            begin
+                // TODO finish when functions form t38 are visible in this context
+                /*
+                //NAVE111.0; 001; begin
+                GeneralLedgerSetup.get();
+                if GeneralLedgerSetup."East Localization" then begin
+                        if ("SAD No." <> '') then begin
+                          SADHeader.GET("SAD No.");
+                          if SADHeader."Customs Currency Code" <> "Currency Code" then
+                            FIELDERROR("Currency Code");
+                        end;
+                        if (CurrFieldNo <> FIELDNO("Currency Code")) and ("Currency Code" = xRec."Currency Code") and
+                          (CurrFieldNo <> FIELDNO("SAD No.")) then
+                            UpdateCurrencyFactor
+                        else
+                          if "Currency Code" <> xRec."Currency Code" then begin
+                            UpdateCurrencyFactor;
+                            if PurchLinesExist then
+                              if CONFIRM(ChangeCurrencyQst,false,FIELDCAPTION("Currency Code")) then begin
+                                SetHideValidationDialog(true);
+                                RecreatePurchLines(FIELDCAPTION("Currency Code"));
+                                SetHideValidationDialog(false);
+                              end else
+                                ERROR(Text018,FIELDCAPTION("Currency Code"));
+                          end else
+                            if "Currency Code" <> '' then begin
+                              UpdateCurrencyFactor;
+                              if "Currency Factor" <> xRec."Currency Factor" then
+                                ConfirmUpdateCurrencyFactor;
+                            end;
 
-        //trigger "(Field 4)();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TESTFIELD(Status,Status::Open);
-        if (xRec."Pay-to Vendor No." <> "Pay-to Vendor No.") and
-           (xRec."Pay-to Vendor No." <> '')
-        then begin
-        #5..26
-        "Pay-to Name" := Vend.Name;
-        "Pay-to Name 2" := Vend."Name 2";
-        CopyPayToVendorAddressFieldsFromVendor(Vend,false);
-        if not SkipPayToContact then
-          "Pay-to Contact" := Vend.Contact;
-        "Payment Terms Code" := Vend."Payment Terms Code";
-        #33..60
-        VALIDATE("Currency Code");
-        VALIDATE("Creditor No.",Vend."Creditor No.");
-
-        OnValidatePurchaseHeaderPayToVendorNo(Vend);
-
-        if "Document Type" = "Document Type"::Order then
-        #67..88
-
-        if (xRec."Pay-to Vendor No." <> '') and (xRec."Pay-to Vendor No." <> "Pay-to Vendor No.") then
-          RecallModifyAddressNotification(GetModifyPayToVendorAddressNotificationId);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        TESTFIELD(Status,Status::Open);
-
-        //NAVE111.0; 001; begin
-        if ("SAD No." <> '') and LocalizationUsage.UseEastLocalization then begin
-          SADHeader.GET("SAD No.");
-          if (SADHeader."Vendor No." <> '') and (SADHeader."Vendor No." <> "Pay-to Vendor No.") then
-            FIELDERROR("Pay-to Vendor No.");
-        end;
-        //NAVE111.0; 001; end
-
-        #2..29
-
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          "VAT Country/Region Code" := Vend."Country/Region Code";
-          "Industry Code" := Vend."Industry Code";
-        end;
-        //NAVE111.0; 001; end
-
-        #30..63
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          "Registration No." := Vend."Registration No.";
-          "Registration No. 2" := Vend."Registration No. 2";
-          "Identification No." := Vend."Identification No.";
-        end;
-        //NAVE111.0; 001; end
-        #64..91
-        */
-        //end;
-
-
-        //Unsupported feature: CodeModification on ""Posting Date"(Field 20).OnValidate". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //>>>> ORIGINAL CODE:
-        //begin
-        /*
-        TestNoSeriesDate(
-          "Posting No.","Posting No. Series",
-          FIELDCAPTION("Posting No."),FIELDCAPTION("Posting No. Series"));
-        #4..10
-        if "Incoming Document Entry No." = 0 then
-          VALIDATE("Document Date","Posting Date");
-
-        if ("Document Type" in ["Document Type"::Invoice,"Document Type"::"Credit Memo"]) and
-           not ("Posting Date" = xRec."Posting Date")
-        then
-        #17..27
-
-        if PurchLinesExist then
-          JobUpdatePurchLines(SkipJobCurrFactorUpdate);
-        */
-        //end;
-        //>>>> MODIFIED CODE:
-        //begin
-        /*
-        #1..13
-        //NAVE111.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then begin
-          PurchSetup.GET;
-          if PurchSetup."Default VAT Date" = PurchSetup."Default VAT Date"::"Posting Date" then
-            VALIDATE("VAT Date","Posting Date");
-        end;
-        //NAVE111.0; 001; end
-
-        #14..30
-
-        //NAVBG11.0; 001; begin
-        if LocalizationUsage.UseEastLocalization then
-          if "Posting Date" <> xRec."Posting Date" then
-            UpdateExciseLabels;
-        //NAVBG11.0; 011; end
-        */
-        //end;
-
-
-        //Unsupported feature: CodeInsertion on ""Vendor Posting Group"(Field 31)". Please convert manually.
-
-        //trigger OnValidate();
-        //Parameters and return type have not been exported.
-        //begin
-        /*
-        //NAVE111.0; 001; begin
-        if (CurrFieldNo = FIELDNO("Vendor Posting Group")) and
-           ("Vendor Posting Group" <> xRec."Vendor Posting Group") and
-           LocalizationUsage.UseEastLocalization
-        then begin
-          PurchSetup.GET;
-          if PurchSetup."Allow Alter Posting Groups" then begin
-            if not SubstVendPostingGrp.GET(xRec."Vendor Posting Group","Vendor Posting Group") then
-              ERROR(Text46012225,xRec."Vendor Posting Group","Vendor Posting Group",SubstVendPostingGrp.TABLECAPTION);
-          end else
-            ERROR(Text46012226,FIELDCAPTION("Vendor Posting Group"),PurchSetup.FIELDCAPTION("Allow Alter Posting Groups"));
-        end;
-        //NAVE111.0; 001; end
-        */
-        //end;
-
+                end else
+                //NAVE111.0; 001; end
+                */
+            end;
+        }
 
         //Unsupported feature: CodeModification on ""Currency Code"(Field 32).OnValidate". Please convert manually.
 
@@ -608,6 +566,31 @@ tableextension 46015562 "Purchase Header Extension" extends "Purchase Header"
         }
     }
 
+
+    trigger OnBeforeInsert()
+    var
+        GeneralLedgerSetup: Record "General Ledger Setup";
+        PurchSetup: Record "Purchases & Payables Setup";
+    begin
+        //NAVE111.0; 001; begin
+        GeneralLedgerSetup.Get();
+        PurchSetup.Get();
+        if GeneralLedgerSetup."East Localization" then
+            VALIDATE("Posting Desc. Code", PurchSetup."Posting Desc. Code");
+        //NAVE111.0; 001; end
+    end;
+
+    trigger OnInsert()
+    var
+        GeneralLedgerSetup: Record "General Ledger Setup";
+        PurchSetup: Record "Purchases & Payables Setup";
+    begin
+        //NAVE111.0; 001; begin
+        GeneralLedgerSetup.Get();
+        if GeneralLedgerSetup."East Localization" then
+            VALIDATE("Posting Desc. Code");
+        //NAVE111.0; 001; end
+    end;
 
     //Unsupported feature: CodeModification on "OnInsert". Please convert manually.
 

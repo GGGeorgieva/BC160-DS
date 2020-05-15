@@ -50,4 +50,15 @@ codeunit 46015800 "Inv. Posting Buffer Subscr."
         InvoicePostBuffer."VAT Date" := ServiceLine."VAT Date";
     end;
 
+    [EventSubscriber(ObjectType::Table, Database::"Invoice Post. Buffer", 'OnBeforeInvPostBufferModify', '', true, true)]
+    local procedure MyProcedure(var InvoicePostBuffer: Record "Invoice Post. Buffer"; FromInvoicePostBuffer: Record "Invoice Post. Buffer")
+    begin
+        InvoicePostBuffer."Excise Amount" += FromInvoicePostBuffer."Excise Amount";
+        InvoicePostBuffer."Excise Amount (ACY)" += FromInvoicePostBuffer."Excise Amount (ACY)";
+        InvoicePostBuffer."Product Tax Amount (ACY)" += FromInvoicePostBuffer."Product Tax Amount (ACY)";
+        InvoicePostBuffer."Product Tax Amount" += FromInvoicePostBuffer."Product Tax Amount";
+        InvoicePostBuffer."VAT Base (Non Deductible)" += FromInvoicePostBuffer."VAT Base (Non Deductible)";
+        InvoicePostBuffer."VAT Amount (Non Deductible)" += FromInvoicePostBuffer."VAT Amount (Non Deductible)";
+    end;
+
 }
